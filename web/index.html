@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeFlow - Music-Driven Home Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .feature {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta {
+            text-align: center;
+            margin-top: 4rem;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .status.connected {
+            border-left: 4px solid #4ade80;
+        }
+        
+        .status.disconnected {
+            border-left: 4px solid #f87171;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HomeFlow</h1>
+        <p class="tagline">Music-Driven Home Automation</p>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <h2>Your Home Dances to Your Music</h2>
+            <p>Experience the future of home automation where your music controls everything</p>
+        </section>
+        
+        <section class="features">
+            <div class="feature">
+                <div class="icon">🎵</div>
+                <h3>Unified Music Experience</h3>
+                <p>Seamlessly blend Spotify and Hype Machine in one beautiful interface</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">🏠</div>
+                <h3>Smart Device Control</h3>
+                <p>Control SwitchBot, Yale locks, and Sonos speakers with intelligent automation</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">🎭</div>
+                <h3>Mood-Based Scenes</h3>
+                <p>Lights and atmosphere adapt to your music's mood automatically</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">👋</div>
+                <h3>Gesture Control</h3>
+                <p>Control your music and home with intuitive switch patterns</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">🔒</div>
+                <h3>Welcome Home</h3>
+                <p>Your favorite music starts playing when you unlock your door</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">⚡</div>
+                <h3>Real-Time Sync</h3>
+                <p>Everything stays in perfect sync with WebSocket technology</p>
+            </div>
+        </section>
+        
+        <div class="cta">
+            <a href="#" class="button" id="launchApp">Launch App Dashboard</a>
+        </div>
+    </main>
+    
+    <div class="status disconnected" id="status">
+        <span id="statusText">Connecting to HomeFlow...</span>
+    </div>
+    
+    <script>
+        // Check backend connection
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    document.getElementById('status').className = 'status connected';
+                    document.getElementById('statusText').textContent = 'Connected to HomeFlow v' + data.version;
+                }
+            } catch (error) {
+                document.getElementById('status').className = 'status disconnected';
+                document.getElementById('statusText').textContent = 'Backend not running';
+            }
+        }
+        
+        // Check status on load and every 5 seconds
+        checkBackendStatus();
+        setInterval(checkBackendStatus, 5000);
+        
+        // Demo mode for launch button
+        document.getElementById('launchApp').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Full dashboard coming soon! The backend API is ready at http://localhost:3000');
+        });
+    </script>
+</body>
+</html>
