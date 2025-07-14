@@ -40,7 +40,10 @@ class MusicVisualizer {
     }
 
     connectWebSocket() {
-        this.ws = new WebSocket('ws://localhost:3000/ws');
+        const wsUrl = window.location.hostname === 'localhost' 
+            ? 'ws://localhost:3000/ws'
+            : 'wss://homeflow-backend.onrender.com/ws';
+        this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
             console.log('Connected to HomeFlow');

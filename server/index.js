@@ -77,7 +77,12 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+const HOST = '0.0.0.0'; // Important for Render
+
+server.listen(PORT, HOST, () => {
   logger.info(`HomeFlow server running on port ${PORT}`);
-  logger.info(`WebSocket server available at ws://localhost:${PORT}/ws`);
+  const wsUrl = process.env.NODE_ENV === 'production' 
+    ? `wss://${process.env.RENDER_EXTERNAL_HOSTNAME}/ws`
+    : `ws://localhost:${PORT}/ws`;
+  logger.info(`WebSocket server available at ${wsUrl}`);
 });
