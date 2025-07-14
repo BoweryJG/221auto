@@ -1,11 +1,21 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const EventEmitter = require('events');
+const gestureController = require('./gestureController');
 
-class SwitchBotService {
+class SwitchBotService extends EventEmitter {
   constructor() {
+    super();
     this.apiUrl = 'https://api.switch-bot.com/v1.1';
     this.token = process.env.SWITCHBOT_TOKEN;
     this.secret = process.env.SWITCHBOT_SECRET;
+    this.setupGestureHandling();
+  }
+
+  setupGestureHandling() {
+    gestureController.on('gesture', (data) => {
+      this.emit('gesture-detected', data);
+    });
   }
 
   generateSignature(token, secret, t, nonce) {
@@ -79,6 +89,31 @@ class SwitchBotService {
       return response.data;
     } catch (error) {
       console.error('SwitchBot webhook error:', error);
+      throw error;
+    }
+  }
+
+  handleWebhookEvent(event) {
+    if (event.eventType === 'changeReport' && event.context.deviceType === 'Bot') {
+      // Process button press events for gesture recognition
+      const deviceId = event.context.deviceMac;
+      const eventType = event.context.powerState === 'ON' ? 'press' : 'release';
+      
+      gestureController.processDeviceEvent(deviceId, {
+        type: eventType,
+        deviceId,
+        timestamp: Date.now()
+      });
+    }
+  }
+
+  async enableGestureMode(deviceId) {
+    // Configure device for gesture detection
+    try {
+      await this.sendCommand(deviceId, 'setMode', 'press');
+      console.log(`Gesture mode enabled for device ${deviceId}`);
+    } catch (error) {
+      console.error('Error enabling gesture mode:', error);
       throw error;
     }
   }

@@ -66,6 +66,7 @@ app.use('/api/devices', require('./api/devices'));
 app.use('/api/music', require('./api/music'));
 app.use('/api/automation', require('./api/automation'));
 app.use('/api/auth', require('./api/auth'));
+app.use('/api/webhooks', require('./api/webhooks'));
 
 app.use((err, req, res, next) => {
   logger.error(err.stack);
