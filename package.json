@@ -1,0 +1,47 @@
+{
+  "name": "homeflow",
+  "version": "1.0.0",
+  "description": "An iconic music-driven home automation platform",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "nodemon server/index.js",
+    "start": "node server/index.js",
+    "test": "jest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "home-automation",
+    "switchbot",
+    "yale",
+    "sonos",
+    "spotify",
+    "hype-machine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2",
+    "ws": "^8.14.2",
+    "redis": "^4.6.10",
+    "pg": "^8.11.3",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "spotify-web-api-node": "^5.0.2",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.4",
+    "@types/express": "^4.17.21"
+  }
+}
