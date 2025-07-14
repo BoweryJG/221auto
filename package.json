@@ -34,7 +34,8 @@
     "bcrypt": "^5.1.1",
     "spotify-web-api-node": "^5.0.2",
     "node-cron": "^3.0.3",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
