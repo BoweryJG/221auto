@@ -178,7 +178,7 @@
         </section>
         
         <div class="cta">
-            <a href="#" class="button" id="launchApp">Launch App Dashboard</a>
+            <a href="/visualizer/" class="button" id="launchApp">Launch Music Visualizer</a>
         </div>
     </main>
     
@@ -207,11 +207,7 @@
         checkBackendStatus();
         setInterval(checkBackendStatus, 5000);
         
-        // Demo mode for launch button
-        document.getElementById('launchApp').addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('Full dashboard coming soon! The backend API is ready at http://localhost:3000');
-        });
+        // Remove demo mode - visualizer is ready!
     </script>
 </body>
 </html>
