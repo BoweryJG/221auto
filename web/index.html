@@ -191,7 +191,7 @@
         async function checkBackendStatus() {
             const apiUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:3000/health'
-                : 'https://homeflow-backend.onrender.com/health';
+                : 'https://two21auto.onrender.com/health';
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();

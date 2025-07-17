@@ -6,11 +6,30 @@ const sonosService = require('../services/sonos');
 
 router.get('/', async (req, res) => {
   try {
-    const devices = {
-      switchbot: await switchBotService.getDevices(),
-      yale: await yaleService.getLocks(),
-      sonos: await sonosService.getSpeakers()
-    };
+    const devices = {};
+    
+    // Try each service individually to avoid complete failure
+    try {
+      devices.switchbot = await switchBotService.getDevices();
+    } catch (error) {
+      console.error('SwitchBot error:', error);
+      devices.switchbot = { error: error.message };
+    }
+    
+    try {
+      devices.yale = await yaleService.getLocks();
+    } catch (error) {
+      console.error('Yale error:', error);
+      devices.yale = { error: error.message };
+    }
+    
+    try {
+      devices.sonos = await sonosService.getSpeakers();
+    } catch (error) {
+      console.error('Sonos error:', error);
+      devices.sonos = { error: error.message };
+    }
+    
     res.json(devices);
   } catch (error) {
     res.status(500).json({ error: error.message });

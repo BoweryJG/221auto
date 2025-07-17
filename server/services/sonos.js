@@ -164,7 +164,75 @@ class SonosService extends EventEmitter {
   }
 
   async getAccessToken() {
-    return 'mock-token';
+    // Check if we have stored tokens
+    if (process.env.SONOS_ACCESS_TOKEN) {
+      return process.env.SONOS_ACCESS_TOKEN;
+    }
+    
+    // If no token, throw error with instructions
+    throw new Error('Sonos not authenticated. Please visit /auth/sonos to authenticate.');
+  }
+  
+  async refreshAccessToken(refreshToken) {
+    const tokenUrl = 'https://api.sonos.com/login/v3/oauth/access';
+    
+    try {
+      const response = await axios.post(tokenUrl, new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+      }), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        auth: {
+          username: this.clientId,
+          password: this.clientSecret
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error refreshing Sonos token:', error);
+      throw error;
+    }
+  }
+  
+  getAuthUrl() {
+    const authUrl = 'https://api.sonos.com/login/v3/oauth';
+    const params = new URLSearchParams({
+      client_id: this.clientId,
+      response_type: 'code',
+      state: 'sonos-auth',
+      scope: 'playback-control-all',
+      redirect_uri: process.env.SONOS_REDIRECT_URI || 'http://localhost:3000/auth/sonos/callback'
+    });
+    
+    return `${authUrl}?${params}`;
+  }
+  
+  async exchangeCodeForToken(code) {
+    const tokenUrl = 'https://api.sonos.com/login/v3/oauth/access';
+    
+    try {
+      const response = await axios.post(tokenUrl, new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: process.env.SONOS_REDIRECT_URI || 'http://localhost:3000/auth/sonos/callback'
+      }), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        auth: {
+          username: this.clientId,
+          password: this.clientSecret
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error exchanging Sonos code:', error);
+      throw error;
+    }
   }
 }
 
