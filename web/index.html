@@ -321,8 +321,14 @@
         
         // Device control functions
         async function controlDoor() {
+            console.log('Door button clicked!');
             const btn = document.getElementById('doorBtn');
             const status = document.getElementById('doorStatus');
+            
+            if (!btn || !status) {
+                console.error('Button or status element not found');
+                return;
+            }
             
             btn.disabled = true;
             btn.textContent = 'Pressing...';
@@ -334,6 +340,8 @@
                     ? 'http://localhost:3000'
                     : 'https://two21auto.onrender.com';
                 
+                console.log('Sending request to:', `${apiUrl}/api/devices/switchbot/C05347C7F246/command`);
+                
                 const response = await fetch(`${apiUrl}/api/devices/switchbot/C05347C7F246/command`, {
                     method: 'POST',
                     headers: {
@@ -342,7 +350,9 @@
                     body: JSON.stringify({ command: 'press' })
                 });
                 
+                console.log('Response status:', response.status);
                 const result = await response.json();
+                console.log('Response data:', result);
                 
                 if (response.ok) {
                     status.textContent = 'Door pressed successfully!';
@@ -352,6 +362,7 @@
                     status.className = 'status-indicator error';
                 }
             } catch (error) {
+                console.error('Error:', error);
                 status.textContent = `Connection error: ${error.message}`;
                 status.className = 'status-indicator error';
             }
