@@ -58,6 +58,214 @@
             margin-bottom: 1rem;
         }
         
+        .quick-controls {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .vault-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .vault-button {
+            position: relative;
+            padding: 1.5rem 2.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 16px;
+            
+            /* Antique brass/bronze metallic appearance */
+            background: linear-gradient(145deg, 
+                #DAA520 0%, 
+                #CD7F32 30%, 
+                #B8860B 50%, 
+                #8B4513 70%, 
+                #654321 100%);
+            
+            /* Heavy 3D vault door effect */
+            box-shadow: 
+                inset 0 3px 6px rgba(255, 215, 0, 0.4),
+                inset 0 -3px 6px rgba(139, 69, 19, 0.8),
+                inset 0 0 0 3px rgba(93, 64, 55, 0.6),
+                0 12px 24px rgba(0, 0, 0, 0.4),
+                0 6px 12px rgba(0, 0, 0, 0.3);
+            
+            /* Text styling */
+            color: #2F1B14;
+            text-shadow: 
+                0 1px 0 rgba(218, 165, 32, 0.8),
+                0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 8px rgba(255, 215, 0, 0.3);
+            
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+            
+            /* Mobile optimization */
+            min-height: 60px;
+            min-width: 280px;
+            touch-action: manipulation;
+        }
+        
+        .vault-button::before,
+        .vault-button::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #5D4037 30%, #8B4513 70%);
+            border-radius: 50%;
+            top: 12px;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.6),
+                0 1px 2px rgba(255, 215, 0, 0.3);
+        }
+        
+        .vault-button::before { left: 12px; }
+        .vault-button::after { right: 12px; }
+        
+        .vault-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                inset 0 3px 6px rgba(255, 215, 0, 0.5),
+                inset 0 -3px 6px rgba(139, 69, 19, 0.8),
+                inset 0 0 0 3px rgba(93, 64, 55, 0.6),
+                0 16px 32px rgba(0, 0, 0, 0.4),
+                0 8px 16px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 215, 0, 0.2);
+        }
+        
+        .vault-button:active {
+            transform: translateY(1px);
+            box-shadow: 
+                inset 0 4px 8px rgba(139, 69, 19, 0.9),
+                inset 0 -2px 4px rgba(255, 215, 0, 0.2),
+                inset 0 0 0 3px rgba(93, 64, 55, 0.8),
+                0 4px 8px rgba(0, 0, 0, 0.6);
+        }
+        
+        .vault-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .vault-icon {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+        }
+        
+        .vault-text {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: 0.2rem;
+        }
+        
+        .vault-subtext {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-weight: 700;
+        }
+        
+        .vault-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 8px currentColor;
+        }
+        
+        .status-led.ready {
+            background: #4ade80;
+            color: #4ade80;
+        }
+        
+        .status-led.processing {
+            background: #f59e0b;
+            color: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+        
+        .status-led.error {
+            background: #ef4444;
+            color: #ef4444;
+        }
+        
+        .status-led.success {
+            background: #22c55e;
+            color: #22c55e;
+        }
+        
+        .status-text {
+            color: #e5e7eb;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .vault-button {
+                min-width: 260px;
+                padding: 1.3rem 2rem;
+                font-size: 1rem;
+            }
+            
+            .vault-icon {
+                font-size: 1.8rem;
+            }
+            
+            .vault-text {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .vault-button {
+                min-width: 240px;
+                padding: 1.2rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .vault-icon {
+                font-size: 1.6rem;
+            }
+            
+            .vault-text {
+                font-size: 1rem;
+            }
+        }
+        
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -228,6 +436,21 @@
         <section class="hero">
             <h2>Your Home Dances to Your Music</h2>
             <p>Experience the future of home automation where your music controls everything</p>
+            
+            <!-- Quick Controls -->
+            <div class="quick-controls">
+                <div class="vault-container">
+                    <button class="vault-button" id="doorBtn" onclick="controlDoor()" aria-label="Open Door - Bank Vault Control">
+                        <span class="vault-icon">🔐</span>
+                        <span class="vault-text">VAULT ACCESS</span>
+                        <span class="vault-subtext">PRESS TO OPEN</span>
+                    </button>
+                    <div class="vault-status" id="doorStatus">
+                        <div class="status-led ready"></div>
+                        <span class="status-text">READY</span>
+                    </div>
+                </div>
+            </div>
         </section>
         
         <section class="features">
@@ -323,17 +546,18 @@
         async function controlDoor() {
             console.log('Door button clicked!');
             const btn = document.getElementById('doorBtn');
-            const status = document.getElementById('doorStatus');
+            const statusContainer = document.getElementById('doorStatus');
+            const statusLed = statusContainer.querySelector('.status-led');
+            const statusText = statusContainer.querySelector('.status-text');
             
-            if (!btn || !status) {
-                console.error('Button or status element not found');
+            if (!btn || !statusContainer || !statusLed || !statusText) {
+                console.error('Button or status elements not found');
                 return;
             }
             
             btn.disabled = true;
-            btn.textContent = 'Pressing...';
-            status.textContent = 'Sending command...';
-            status.className = 'status-indicator';
+            statusLed.className = 'status-led processing';
+            statusText.textContent = 'OPENING...';
             
             try {
                 const apiUrl = window.location.hostname === 'localhost'
@@ -355,25 +579,24 @@
                 console.log('Response data:', result);
                 
                 if (response.ok) {
-                    status.textContent = 'Door pressed successfully!';
-                    status.className = 'status-indicator success';
+                    statusLed.className = 'status-led success';
+                    statusText.textContent = 'ACCESS GRANTED';
                 } else {
-                    status.textContent = `Error: ${result.error}`;
-                    status.className = 'status-indicator error';
+                    statusLed.className = 'status-led error';
+                    statusText.textContent = 'ACCESS DENIED';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                status.textContent = `Connection error: ${error.message}`;
-                status.className = 'status-indicator error';
+                statusLed.className = 'status-led error';
+                statusText.textContent = 'SYSTEM ERROR';
             }
             
             btn.disabled = false;
-            btn.textContent = 'Press Door Button';
             
             // Reset status after 3 seconds
             setTimeout(() => {
-                status.textContent = 'Ready';
-                status.className = 'status-indicator';
+                statusLed.className = 'status-led ready';
+                statusText.textContent = 'READY';
             }, 3000);
         }
         
