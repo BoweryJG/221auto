@@ -22,6 +22,7 @@ const logger = winston.createLogger({
   ]
 });
 
+app.set('trust proxy', 1); // Trust first proxy for Render
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
