@@ -125,6 +125,97 @@
         .status.disconnected {
             border-left: 4px solid #f87171;
         }
+        
+        .controls {
+            margin-top: 4rem;
+            padding: 2rem 0;
+        }
+        
+        .controls h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .control-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .control-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+            width: 100%;
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.3);
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .control-btn.secondary {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+        }
+        
+        .control-btn.secondary:hover {
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .status-indicator {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .status-indicator.success {
+            background: rgba(74, 222, 128, 0.3);
+            color: #4ade80;
+        }
+        
+        .status-indicator.error {
+            background: rgba(248, 113, 113, 0.3);
+            color: #f87171;
+        }
+        
+        #devicesList {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -180,6 +271,24 @@
         <div class="cta">
             <a href="/visualizer/" class="button" id="launchApp">Launch Music Visualizer</a>
         </div>
+        
+        <section class="controls">
+            <h2>Device Controls</h2>
+            <div class="control-grid">
+                <div class="control-card">
+                    <h3>🚪 Door Control</h3>
+                    <p>SwitchBot Door Bot</p>
+                    <button class="control-btn" id="doorBtn" onclick="controlDoor()">Press Door Button</button>
+                    <div class="status-indicator" id="doorStatus">Ready</div>
+                </div>
+                
+                <div class="control-card">
+                    <h3>🏠 Connected Devices</h3>
+                    <div id="devicesList">Loading...</div>
+                    <button class="control-btn secondary" onclick="refreshDevices()">Refresh Devices</button>
+                </div>
+            </div>
+        </section>
     </main>
     
     <div class="status disconnected" id="status">
@@ -210,7 +319,101 @@
         checkBackendStatus();
         setInterval(checkBackendStatus, 5000);
         
-        // Remove demo mode - visualizer is ready!
+        // Device control functions
+        async function controlDoor() {
+            const btn = document.getElementById('doorBtn');
+            const status = document.getElementById('doorStatus');
+            
+            btn.disabled = true;
+            btn.textContent = 'Pressing...';
+            status.textContent = 'Sending command...';
+            status.className = 'status-indicator';
+            
+            try {
+                const apiUrl = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000'
+                    : 'https://two21auto.onrender.com';
+                
+                const response = await fetch(`${apiUrl}/api/devices/switchbot/C05347C7F246/command`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: 'press' })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    status.textContent = 'Door pressed successfully!';
+                    status.className = 'status-indicator success';
+                } else {
+                    status.textContent = `Error: ${result.error}`;
+                    status.className = 'status-indicator error';
+                }
+            } catch (error) {
+                status.textContent = `Connection error: ${error.message}`;
+                status.className = 'status-indicator error';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Press Door Button';
+            
+            // Reset status after 3 seconds
+            setTimeout(() => {
+                status.textContent = 'Ready';
+                status.className = 'status-indicator';
+            }, 3000);
+        }
+        
+        async function refreshDevices() {
+            const devicesList = document.getElementById('devicesList');
+            devicesList.textContent = 'Loading...';
+            
+            try {
+                const apiUrl = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000'
+                    : 'https://two21auto.onrender.com';
+                
+                const response = await fetch(`${apiUrl}/api/devices`);
+                const devices = await response.json();
+                
+                let html = '';
+                
+                if (devices.switchbot && devices.switchbot.length) {
+                    html += '<strong>SwitchBot Devices:</strong><br>';
+                    devices.switchbot.forEach(device => {
+                        html += `• ${device.deviceName} (${device.deviceType})<br>`;
+                    });
+                }
+                
+                if (devices.yale && devices.yale.length) {
+                    html += '<strong>Yale Locks:</strong><br>';
+                    devices.yale.forEach(lock => {
+                        html += `• ${lock.name}<br>`;
+                    });
+                } else if (devices.yale && devices.yale.error) {
+                    html += '<strong>Yale:</strong> Not configured<br>';
+                }
+                
+                if (devices.sonos && devices.sonos.length) {
+                    html += '<strong>Sonos Speakers:</strong><br>';
+                    devices.sonos.forEach(speaker => {
+                        html += `• ${speaker.name}<br>`;
+                    });
+                } else {
+                    html += '<strong>Sonos:</strong> Not configured<br>';
+                }
+                
+                devicesList.innerHTML = html || 'No devices found';
+                
+            } catch (error) {
+                devicesList.textContent = `Error loading devices: ${error.message}`;
+            }
+        }
+        
+        // Load devices on page load
+        refreshDevices();
     </script>
 </body>
 </html>
