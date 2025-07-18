@@ -123,6 +123,21 @@
             transform: translateY(-2px);
         }
         
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .music-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
         .beat-indicator {
             position: fixed;
             top: 50%;
@@ -173,6 +188,13 @@
     <div class="controls">
         <button id="modeBtn">Mode: Waves</button>
         <button id="fullscreenBtn">Fullscreen</button>
+    </div>
+    
+    <div class="music-controls">
+        <button id="prevBtn">⏮️ Previous</button>
+        <button id="playPauseBtn">⏯️ Play/Pause</button>
+        <button id="nextBtn">⏭️ Next</button>
+        <button id="volumeBtn">🔊 Volume</button>
     </div>
     
     <div class="beat-indicator" id="beatIndicator"></div>

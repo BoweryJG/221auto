@@ -115,6 +115,79 @@ class MusicVisualizer {
                 document.exitFullscreen();
             }
         });
+        
+        // Music control buttons
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            this.sendMusicCommand('previous');
+        });
+        
+        document.getElementById('playPauseBtn').addEventListener('click', () => {
+            this.sendMusicCommand('playPause');
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            this.sendMusicCommand('next');
+        });
+        
+        document.getElementById('volumeBtn').addEventListener('click', () => {
+            const volume = prompt('Enter volume (0-100):');
+            if (volume !== null && !isNaN(volume)) {
+                this.sendMusicCommand('setVolume', parseInt(volume));
+            }
+        });
+    }
+    
+    sendMusicCommand(command, value) {
+        const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : 'https://two21auto.onrender.com';
+        
+        let endpoint;
+        let body = {};
+        
+        switch(command) {
+            case 'playPause':
+                // This would typically call Sonos play/pause API
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'musicControl',
+                        action: 'playPause'
+                    }));
+                }
+                console.log('Play/Pause command sent');
+                break;
+                
+            case 'next':
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'musicControl',
+                        action: 'next'
+                    }));
+                }
+                console.log('Next track command sent');
+                break;
+                
+            case 'previous':
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'musicControl',
+                        action: 'previous'
+                    }));
+                }
+                console.log('Previous track command sent');
+                break;
+                
+            case 'setVolume':
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'musicControl',
+                        action: 'setVolume',
+                        volume: value
+                    }));
+                }
+                console.log('Volume set to:', value);
+                break;
+        }
     }
 
     simulateAudioData() {
