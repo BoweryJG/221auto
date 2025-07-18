@@ -73,10 +73,13 @@ router.post('/analyze', async (req, res) => {
 // Missing endpoints that the frontend needs
 router.get('/hypem/popular', async (req, res) => {
   try {
+    console.log('HypeM popular request received');
     const popular = await hypemService.getPopular();
+    console.log(`HypeM popular returned ${popular.length} tracks`);
     res.json({ tracks: popular });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('HypeM popular error:', error);
+    res.status(500).json({ error: error.message, details: error.stack });
   }
 });
 
