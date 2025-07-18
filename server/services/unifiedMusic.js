@@ -93,20 +93,161 @@ class UnifiedMusicService extends EventEmitter {
 
   calculateMood(analysis) {
     const { features } = analysis;
+    const segments = analysis.analysis?.processed?.energyProfile || [];
     
+    // Advanced mood detection using multiple factors
+    const moods = [];
+    
+    // Basic audio features analysis
     if (features.energy > 0.8 && features.valence > 0.7) {
-      return 'party';
-    } else if (features.energy < 0.3 && features.valence < 0.4) {
-      return 'chill';
-    } else if (features.energy > 0.6 && features.valence < 0.4) {
-      return 'intense';
-    } else if (features.acousticness > 0.7) {
-      return 'acoustic';
-    } else if (features.danceability > 0.7) {
-      return 'dance';
-    } else {
+      moods.push({ mood: 'party', confidence: 0.9 });
+    }
+    
+    if (features.energy < 0.3 && features.valence < 0.4) {
+      moods.push({ mood: 'chill', confidence: 0.8 });
+    }
+    
+    if (features.energy > 0.6 && features.valence < 0.4) {
+      moods.push({ mood: 'intense', confidence: 0.7 });
+    }
+    
+    if (features.acousticness > 0.7) {
+      moods.push({ mood: 'acoustic', confidence: 0.8 });
+    }
+    
+    if (features.danceability > 0.7) {
+      moods.push({ mood: 'dance', confidence: 0.7 });
+    }
+    
+    // Advanced analysis using pitch and timbre if available
+    if (segments.length > 0) {
+      const advancedMood = this.analyzeAdvancedMood(segments, features);
+      if (advancedMood) {
+        moods.push(advancedMood);
+      }
+    }
+    
+    // Temporal analysis for dynamic moods
+    if (analysis.analysis?.processed?.sectionMap) {
+      const temporalMood = this.analyzeTemporalMood(analysis.analysis.processed.sectionMap);
+      if (temporalMood) {
+        moods.push(temporalMood);
+      }
+    }
+    
+    // Return the mood with highest confidence, or 'neutral' if no strong mood detected
+    if (moods.length === 0) {
       return 'neutral';
     }
+    
+    const bestMood = moods.reduce((best, current) => 
+      current.confidence > best.confidence ? current : best
+    );
+    
+    return bestMood.mood;
+  }
+
+  analyzeAdvancedMood(segments, features) {
+    // Analyze pitch and timbre patterns
+    const avgPitchVariation = this.calculatePitchVariation(segments);
+    const timbreComplexity = this.calculateTimbreComplexity(segments);
+    const energyVariation = this.calculateEnergyVariation(segments);
+    
+    // Dark/moody detection using pitch analysis
+    if (avgPitchVariation.dominantPitches.includes(0, 1, 2) && features.valence < 0.3) {
+      return { mood: 'dark', confidence: 0.8 };
+    }
+    
+    // Bright/uplifting detection
+    if (avgPitchVariation.dominantPitches.includes(4, 7, 11) && features.valence > 0.6) {
+      return { mood: 'bright', confidence: 0.7 };
+    }
+    
+    // Experimental/complex detection
+    if (timbreComplexity > 0.8 && energyVariation > 0.7) {
+      return { mood: 'experimental', confidence: 0.6 };
+    }
+    
+    // Dreamy/ambient detection
+    if (timbreComplexity < 0.3 && energyVariation < 0.4 && features.instrumentalness > 0.7) {
+      return { mood: 'dreamy', confidence: 0.7 };
+    }
+    
+    return null;
+  }
+
+  analyzeTemporalMood(sectionMap) {
+    // Analyze how mood changes throughout the song
+    const sectionTypes = sectionMap.map(section => section.type);
+    const dynamicChanges = this.calculateDynamicChanges(sectionMap);
+    
+    // High dynamic range suggests emotional/epic music
+    if (dynamicChanges.loudnessRange > 20 && sectionTypes.includes('chorus')) {
+      return { mood: 'epic', confidence: 0.6 };
+    }
+    
+    // Consistent low energy suggests meditative music
+    if (dynamicChanges.energyVariation < 0.2 && sectionMap.every(s => s.loudness < -10)) {
+      return { mood: 'meditative', confidence: 0.7 };
+    }
+    
+    return null;
+  }
+
+  calculatePitchVariation(segments) {
+    const allPitches = segments.flatMap(seg => seg.pitches || []);
+    const pitchCounts = new Array(12).fill(0);
+    
+    segments.forEach(segment => {
+      if (segment.pitches) {
+        segment.pitches.forEach((pitch, index) => {
+          pitchCounts[index] += pitch;
+        });
+      }
+    });
+    
+    const dominantPitches = pitchCounts
+      .map((count, index) => ({ pitch: index, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3)
+      .map(p => p.pitch);
+    
+    return {
+      dominantPitches,
+      variation: this.calculateVariance(pitchCounts)
+    };
+  }
+
+  calculateTimbreComplexity(segments) {
+    const timbreVariations = segments.map(segment => {
+      if (!segment.timbre || segment.timbre.length === 0) return 0;
+      return this.calculateVariance(segment.timbre);
+    });
+    
+    return timbreVariations.reduce((sum, var) => sum + var, 0) / timbreVariations.length;
+  }
+
+  calculateEnergyVariation(segments) {
+    const energyLevels = segments.map(seg => seg.energy || 0);
+    return this.calculateVariance(energyLevels);
+  }
+
+  calculateDynamicChanges(sectionMap) {
+    const loudnessLevels = sectionMap.map(section => section.loudness || 0);
+    const minLoudness = Math.min(...loudnessLevels);
+    const maxLoudness = Math.max(...loudnessLevels);
+    
+    return {
+      loudnessRange: maxLoudness - minLoudness,
+      energyVariation: this.calculateVariance(loudnessLevels)
+    };
+  }
+
+  calculateVariance(values) {
+    if (values.length === 0) return 0;
+    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    return Math.sqrt(variance);
   }
 
   async analyzeTrackMood(track) {

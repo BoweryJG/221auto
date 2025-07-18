@@ -13,6 +13,7 @@ const server = http.createServer(app);
 // Import music services
 const unifiedMusicService = require('./services/unifiedMusic');
 const sonosService = require('./services/sonos');
+const beatTracker = require('./services/beatTracker');
 
 const logger = winston.createLogger({
   level: 'info',
@@ -85,6 +86,72 @@ unifiedMusicService.on('queueUpdated', (queue) => {
   });
 });
 
+// Beat tracker events
+beatTracker.on('trackingStarted', (data) => {
+  broadcast({
+    type: 'trackingStarted',
+    track: data.track,
+    totalBeats: data.totalBeats,
+    totalSections: data.totalSections,
+    timestamp: Date.now()
+  });
+});
+
+beatTracker.on('beat', (data) => {
+  broadcast({
+    type: 'beat',
+    beat: {
+      index: data.index,
+      progress: data.progress,
+      timeRemaining: data.timeRemaining,
+      isDownbeat: data.isDownbeat,
+      measurePosition: data.measurePosition
+    },
+    timestamp: Date.now()
+  });
+});
+
+beatTracker.on('downbeat', (data) => {
+  broadcast({
+    type: 'downbeat',
+    measure: data.measure,
+    progress: data.progress,
+    timestamp: Date.now()
+  });
+});
+
+beatTracker.on('sectionChange', (data) => {
+  broadcast({
+    type: 'sectionChange',
+    section: {
+      index: data.index,
+      type: data.processed?.type || 'unknown',
+      progress: data.progress,
+      sectionProgress: data.sectionProgress
+    },
+    timestamp: Date.now()
+  });
+});
+
+// Section-specific events
+['intro', 'verse', 'chorus', 'bridge', 'outro'].forEach(sectionType => {
+  beatTracker.on(`section:${sectionType}`, (data) => {
+    broadcast({
+      type: 'sectionEvent',
+      sectionType,
+      section: data.processed,
+      timestamp: Date.now()
+    });
+  });
+});
+
+beatTracker.on('trackingStopped', () => {
+  broadcast({
+    type: 'trackingStopped',
+    timestamp: Date.now()
+  });
+});
+
 wss.on('connection', (ws) => {
   logger.info('New WebSocket connection established');
   
@@ -102,6 +169,67 @@ wss.on('connection', (ws) => {
       const data = JSON.parse(message);
       logger.info('Received message:', data);
       
+      // Handle beat tracking commands
+      if (data.type === 'startBeatTracking') {
+        try {
+          const { track, analysis } = data;
+          beatTracker.startTracking(track, analysis);
+          ws.send(JSON.stringify({
+            type: 'beatTrackingStarted',
+            status: 'success',
+            track: track
+          }));
+        } catch (error) {
+          logger.error('Beat tracking error:', error);
+          ws.send(JSON.stringify({
+            type: 'beatTrackingError',
+            error: error.message
+          }));
+        }
+      }
+      
+      if (data.type === 'stopBeatTracking') {
+        beatTracker.stopTracking();
+        ws.send(JSON.stringify({
+          type: 'beatTrackingStopped',
+          status: 'success'
+        }));
+      }
+      
+      if (data.type === 'pauseBeatTracking') {
+        beatTracker.pause();
+        ws.send(JSON.stringify({
+          type: 'beatTrackingPaused',
+          status: 'success'
+        }));
+      }
+      
+      if (data.type === 'resumeBeatTracking') {
+        beatTracker.resume();
+        ws.send(JSON.stringify({
+          type: 'beatTrackingResumed',
+          status: 'success'
+        }));
+      }
+      
+      if (data.type === 'seekBeatTracking') {
+        const { position } = data;
+        beatTracker.seek(position);
+        ws.send(JSON.stringify({
+          type: 'beatTrackingSeeked',
+          status: 'success',
+          position: position
+        }));
+      }
+      
+      if (data.type === 'getBeatTrackingState') {
+        const state = beatTracker.getCurrentState();
+        ws.send(JSON.stringify({
+          type: 'beatTrackingState',
+          state: state
+        }));
+      }
+
       // Handle music control commands
       if (data.type === 'musicControl') {
         const { action, volume } = data;

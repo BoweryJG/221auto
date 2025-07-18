@@ -3,6 +3,7 @@ const cron = require('node-cron');
 const unifiedMusicService = require('./unifiedMusic');
 const switchBotService = require('./switchbot');
 const sonosService = require('./sonos');
+const beatTracker = require('./beatTracker');
 
 class AutomationEngine extends EventEmitter {
   constructor() {
@@ -20,6 +21,26 @@ class AutomationEngine extends EventEmitter {
 
     unifiedMusicService.on('nowPlayingChanged', (track) => {
       this.handleTrackChange(track);
+    });
+
+    // Beat tracker events for real-time automation
+    beatTracker.on('beat', (data) => {
+      this.handleBeatEvent(data);
+    });
+
+    beatTracker.on('downbeat', (data) => {
+      this.handleDownbeatEvent(data);
+    });
+
+    beatTracker.on('sectionChange', (data) => {
+      this.handleSectionChange(data);
+    });
+
+    // Section-specific events
+    ['intro', 'verse', 'chorus', 'bridge', 'outro'].forEach(sectionType => {
+      beatTracker.on(`section:${sectionType}`, (data) => {
+        this.handleSectionTypeEvent(sectionType, data);
+      });
     });
   }
 
@@ -283,6 +304,51 @@ class AutomationEngine extends EventEmitter {
           clearInterval(beatJob);
         }, track.duration);
       }
+    }
+  }
+
+  async handleBeatEvent(data) {
+    const beatRules = Array.from(this.rules.values()).filter(rule => 
+      rule.enabled && 
+      rule.trigger.type === 'beat'
+    );
+
+    for (const rule of beatRules) {
+      await this.executeRule(rule);
+    }
+  }
+
+  async handleDownbeatEvent(data) {
+    const downbeatRules = Array.from(this.rules.values()).filter(rule => 
+      rule.enabled && 
+      rule.trigger.type === 'downbeat'
+    );
+
+    for (const rule of downbeatRules) {
+      await this.executeRule(rule);
+    }
+  }
+
+  async handleSectionChange(data) {
+    const sectionRules = Array.from(this.rules.values()).filter(rule => 
+      rule.enabled && 
+      rule.trigger.type === 'section'
+    );
+
+    for (const rule of sectionRules) {
+      await this.executeRule(rule);
+    }
+  }
+
+  async handleSectionTypeEvent(sectionType, data) {
+    const sectionTypeRules = Array.from(this.rules.values()).filter(rule => 
+      rule.enabled && 
+      rule.trigger.type === 'sectionType' &&
+      rule.trigger.sectionType === sectionType
+    );
+
+    for (const rule of sectionTypeRules) {
+      await this.executeRule(rule);
     }
   }
 
