@@ -342,6 +342,100 @@ class UnifiedMusicService extends EventEmitter {
       albumArt: track.thumb_url
     }));
   }
+
+  // Missing methods that the frontend needs
+  async search(query) {
+    const results = [];
+    
+    try {
+      // Search Spotify
+      const spotifyResults = await spotifyService.searchTracks(query);
+      spotifyResults.forEach(track => {
+        results.push({
+          id: track.id,
+          title: track.name,
+          artist: track.artists.map(a => a.name).join(', '),
+          source: 'spotify',
+          albumArt: track.album.images[0]?.url
+        });
+      });
+    } catch (error) {
+      console.error('Spotify search error:', error);
+    }
+    
+    try {
+      // Search HypeM
+      const hypemResults = await hypemService.searchTracks(query);
+      hypemResults.forEach(track => {
+        results.push({
+          id: track.itemid,
+          title: track.title,
+          artist: track.artist,
+          source: 'hypem',
+          albumArt: track.thumb_url
+        });
+      });
+    } catch (error) {
+      console.error('HypeM search error:', error);
+    }
+    
+    return results;
+  }
+
+  async playTrack(trackId, source) {
+    // Add track to front of queue and play
+    const track = await this.getTrackDetails(source, trackId);
+    
+    this.queue.unshift({
+      id: `${source}-${trackId}`,
+      source,
+      trackId,
+      ...track,
+      addedAt: new Date()
+    });
+    
+    return this.playNext();
+  }
+
+  async togglePlayPause() {
+    // Toggle play/pause on Sonos
+    try {
+      await sonosService.togglePlayPause(null, 'default-group');
+      return { success: true, action: 'toggle' };
+    } catch (error) {
+      console.error('Toggle play/pause error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async nextTrack() {
+    try {
+      await sonosService.nextTrack(null, 'default-group');
+      return this.playNext();
+    } catch (error) {
+      console.error('Next track error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async previousTrack() {
+    try {
+      await sonosService.previousTrack(null, 'default-group');
+      return { success: true, action: 'previous' };
+    } catch (error) {
+      console.error('Previous track error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async removeFromQueue(index) {
+    if (index >= 0 && index < this.queue.length) {
+      const removed = this.queue.splice(index, 1)[0];
+      this.emit('queueUpdated', this.queue);
+      return { success: true, removed };
+    }
+    return { success: false, error: 'Invalid index' };
+  }
 }
 
 module.exports = new UnifiedMusicService();

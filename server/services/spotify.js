@@ -199,6 +199,30 @@ class SpotifyService {
     }
   }
 
+  async getPlaylistTracks(playlistId, accessToken) {
+    this.spotifyApi.setAccessToken(accessToken);
+    
+    try {
+      const data = await this.spotifyApi.getPlaylistTracks(playlistId);
+      return data.body.items.map(item => item.track);
+    } catch (error) {
+      console.error('Spotify playlist tracks error:', error);
+      throw error;
+    }
+  }
+
+  async getTrack(trackId, accessToken) {
+    this.spotifyApi.setAccessToken(accessToken);
+    
+    try {
+      const data = await this.spotifyApi.getTrack(trackId);
+      return data.body;
+    } catch (error) {
+      console.error('Spotify track error:', error);
+      throw error;
+    }
+  }
+
   async createPlaylist(accessToken, name, description) {
     this.spotifyApi.setAccessToken(accessToken);
     
