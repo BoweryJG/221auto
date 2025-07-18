@@ -30,10 +30,12 @@ router.get('/', async (req, res) => {
           };
         } catch (error) {
           console.error('Sonos getSpeakers error:', error);
+          console.error('Full error details:', error.response?.data || error);
           devices.sonos = {
             connected: true,
-            message: 'Connected but unable to get speakers',
-            error: error.message
+            message: `Connected but unable to get speakers: ${error.message}`,
+            error: error.message,
+            details: error.response?.data || null
           };
         }
       } else {
@@ -129,6 +131,41 @@ router.post('/sonos/:speakerId/control', async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug endpoint for Sonos API testing
+router.get('/sonos/debug', async (req, res) => {
+  try {
+    const accessToken = process.env.SONOS_ACCESS_TOKEN;
+    if (!accessToken) {
+      return res.json({ error: 'No Sonos access token found' });
+    }
+
+    const axios = require('axios');
+    const apiUrl = 'https://api.ws.sonos.com/control/api/v1';
+    
+    // Test households endpoint directly
+    const response = await axios.get(`${apiUrl}/households`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    });
+    
+    res.json({
+      status: response.status,
+      data: response.data,
+      headers: response.headers
+    });
+  } catch (error) {
+    res.json({
+      error: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      headers: error.response?.headers
+    });
   }
 });
 
