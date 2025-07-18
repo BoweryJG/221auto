@@ -46,7 +46,7 @@ class MusicVisualizer {
         this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
-            console.log('Connected to HomeFlow');
+            console.log('Connected to 221');
             this.updateDevice('Sonos', 'Connected');
         };
         
@@ -56,7 +56,7 @@ class MusicVisualizer {
         };
         
         this.ws.onclose = () => {
-            console.log('Disconnected from HomeFlow');
+            console.log('Disconnected from 221');
             setTimeout(() => this.connectWebSocket(), 3000);
         };
     }
@@ -76,7 +76,17 @@ class MusicVisualizer {
         } else if (data.type === 'deviceStatus') {
             this.updateDevice(data.device, data.status);
         } else if (data.type === 'beat') {
-            this.onBeat();
+            this.onBeat(data.beat);
+        } else if (data.type === 'downbeat') {
+            this.onDownbeat(data);
+        } else if (data.type === 'sectionChange') {
+            this.onSectionChange(data.section);
+        } else if (data.type === 'sectionEvent') {
+            this.onSectionEvent(data.sectionType, data.section);
+        } else if (data.type === 'trackingStarted') {
+            this.onTrackingStarted(data);
+        } else if (data.type === 'trackingStopped') {
+            this.onTrackingStopped();
         } else if (data.type === 'musicControl') {
             this.handleMusicControlResponse(data);
         }
@@ -234,7 +244,7 @@ class MusicVisualizer {
         }, 50);
     }
 
-    onBeat() {
+    onBeat(beatData) {
         const indicator = document.getElementById('beatIndicator');
         indicator.classList.remove('pulse');
         void indicator.offsetWidth; // Trigger reflow
@@ -242,7 +252,8 @@ class MusicVisualizer {
         
         // Add particles on beat
         if (this.mode === 'particles') {
-            for (let i = 0; i < 10; i++) {
+            const intensity = beatData?.isDownbeat ? 15 : 10;
+            for (let i = 0; i < intensity; i++) {
                 this.particles.push({
                     x: this.canvas.width / 2,
                     y: this.canvas.height / 2,
@@ -255,6 +266,52 @@ class MusicVisualizer {
         }
     }
 
+    onDownbeat(data) {
+        // Enhanced visual effect for downbeats
+        const indicator = document.getElementById('beatIndicator');
+        indicator.style.borderColor = this.getMoodColor();
+        indicator.style.borderWidth = '5px';
+        
+        setTimeout(() => {
+            indicator.style.borderColor = 'rgba(255,255,255,0.3)';
+            indicator.style.borderWidth = '3px';
+        }, 200);
+    }
+
+    onSectionChange(sectionData) {
+        // Update UI to show section change
+        this.updateDevice('Track', `Section: ${sectionData.type || 'Unknown'}`);
+        
+        // Add visual effect for section changes
+        if (this.mode === 'particles') {
+            for (let i = 0; i < 20; i++) {
+                this.particles.push({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5,
+                    life: 1,
+                    color: this.getMoodColor()
+                });
+            }
+        }
+    }
+
+    onSectionEvent(sectionType, sectionData) {
+        console.log(`Section event: ${sectionType}`, sectionData);
+        // Could add specific effects for different section types
+    }
+
+    onTrackingStarted(data) {
+        console.log('Beat tracking started', data);
+        this.updateDevice('Beat Tracker', `Tracking: ${data.totalBeats} beats`);
+    }
+
+    onTrackingStopped() {
+        console.log('Beat tracking stopped');
+        this.updateDevice('Beat Tracker', 'Stopped');
+    }
+
     getMoodColor() {
         const colors = {
             party: ['#FF6B6B', '#FFE66D'],
@@ -262,6 +319,12 @@ class MusicVisualizer {
             intense: ['#FF6B6B', '#C44569'],
             acoustic: ['#F7B731', '#5F27CD'],
             dance: ['#00D2FF', '#3A7BD5'],
+            dark: ['#2C3E50', '#34495E'],
+            bright: ['#FFD700', '#FFA500'],
+            experimental: ['#9B59B6', '#E74C3C'],
+            dreamy: ['#74B9FF', '#0984E3'],
+            epic: ['#E17055', '#FDCB6E'],
+            meditative: ['#00B894', '#55A3FF'],
             neutral: ['#667eea', '#764ba2']
         };
         

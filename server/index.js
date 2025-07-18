@@ -238,7 +238,14 @@ wss.on('connection', (ws) => {
           // Get access token and first available group
           const accessToken = process.env.SONOS_ACCESS_TOKEN;
           if (!accessToken) {
-            throw new Error('Sonos not authenticated');
+            logger.error('Sonos not authenticated - no access token found');
+            broadcast({
+              type: 'musicControl',
+              action: action,
+              status: 'error',
+              error: 'Sonos not authenticated - please connect Sonos first'
+            });
+            return;
           }
 
           // Get households and groups to find first available group

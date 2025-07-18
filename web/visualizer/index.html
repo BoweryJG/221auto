@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomeFlow Music Visualizer</title>
+    <title>221 Music Visualizer</title>
     <style>
         * {
             margin: 0;
@@ -79,6 +79,13 @@
         .mood-intense { background: linear-gradient(45deg, #FF6B6B, #C44569); }
         .mood-acoustic { background: linear-gradient(45deg, #F7B731, #5F27CD); }
         .mood-dance { background: linear-gradient(45deg, #00D2FF, #3A7BD5); }
+        .mood-dark { background: linear-gradient(45deg, #2C3E50, #34495E); }
+        .mood-bright { background: linear-gradient(45deg, #FFD700, #FFA500); }
+        .mood-experimental { background: linear-gradient(45deg, #9B59B6, #E74C3C); }
+        .mood-dreamy { background: linear-gradient(45deg, #74B9FF, #0984E3); }
+        .mood-epic { background: linear-gradient(45deg, #E17055, #FDCB6E); }
+        .mood-meditative { background: linear-gradient(45deg, #00B894, #55A3FF); }
+        .mood-neutral { background: linear-gradient(45deg, #667eea, #764ba2); }
         
         .devices {
             display: flex;
@@ -174,14 +181,14 @@
     <div class="info">
         <div class="now-playing">
             <div class="track-title" id="trackTitle">Waiting for music...</div>
-            <div class="track-artist" id="trackArtist">Connect to HomeFlow</div>
+            <div class="track-artist" id="trackArtist">Connect to 221</div>
             <div id="moodBadge"></div>
         </div>
         
         <div class="devices" id="devices">
             <div class="device">SwitchBot: --</div>
-            <div class="device">Yale Lock: --</div>
             <div class="device">Sonos: --</div>
+            <div class="device">Beat Tracker: --</div>
         </div>
     </div>
     
