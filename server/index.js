@@ -96,10 +96,55 @@ wss.on('connection', (ws) => {
     }));
   }
   
-  ws.on('message', (message) => {
+  ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message);
       logger.info('Received message:', data);
+      
+      // Handle music control commands
+      if (data.type === 'musicControl') {
+        const { action, volume } = data;
+        
+        switch(action) {
+          case 'playPause':
+            // TODO: Implement Sonos play/pause using current access token
+            logger.info('Play/Pause command received');
+            broadcast({
+              type: 'musicControl',
+              action: 'playPause',
+              status: 'executed'
+            });
+            break;
+            
+          case 'next':
+            logger.info('Next track command received');
+            broadcast({
+              type: 'musicControl', 
+              action: 'next',
+              status: 'executed'
+            });
+            break;
+            
+          case 'previous':
+            logger.info('Previous track command received');
+            broadcast({
+              type: 'musicControl',
+              action: 'previous', 
+              status: 'executed'
+            });
+            break;
+            
+          case 'setVolume':
+            logger.info('Volume command received:', volume);
+            broadcast({
+              type: 'musicControl',
+              action: 'setVolume',
+              volume: volume,
+              status: 'executed'
+            });
+            break;
+        }
+      }
     } catch (error) {
       logger.error('Invalid message format:', error);
     }
