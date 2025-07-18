@@ -224,7 +224,7 @@ class UnifiedMusicService extends EventEmitter {
       return this.calculateVariance(segment.timbre);
     });
     
-    return timbreVariations.reduce((sum, var) => sum + var, 0) / timbreVariations.length;
+    return timbreVariations.reduce((sum, variation) => sum + variation, 0) / timbreVariations.length;
   }
 
   calculateEnergyVariation(segments) {
