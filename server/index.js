@@ -371,6 +371,9 @@ app.get('/api/status', (req, res) => {
   });
 });
 
+// Serve static files from web directory
+app.use(express.static('../web'));
+
 app.use('/api/devices', require('./api/devices'));
 app.use('/api/music', require('./api/music'));
 app.use('/api/automation', require('./api/automation'));

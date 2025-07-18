@@ -17,7 +17,16 @@ router.get('/', async (req, res) => {
     
     
     try {
-      devices.sonos = await sonosService.getSpeakers();
+      // Check if Sonos is connected first
+      if (sonosService.isConnected && sonosService.isConnected()) {
+        devices.sonos = await sonosService.getSpeakers();
+      } else {
+        devices.sonos = {
+          connected: false,
+          message: 'Not connected - click Connect Sonos button',
+          speakers: []
+        };
+      }
     } catch (error) {
       console.error('Sonos error:', error);
       devices.sonos = { 

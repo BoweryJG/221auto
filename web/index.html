@@ -1053,13 +1053,15 @@
                     html += '<strong>Yale:</strong> Not configured<br>';
                 }
                 
-                if (devices.sonos && devices.sonos.length) {
+                if (devices.sonos && !devices.sonos.error && devices.sonos.length > 0) {
                     html += '<strong>Sonos Speakers:</strong><br>';
                     devices.sonos.forEach(speaker => {
                         html += `• ${speaker.name}<br>`;
                     });
+                } else if (devices.sonos && devices.sonos.message) {
+                    html += `<strong>Sonos:</strong> ${devices.sonos.message}<br>`;
                 } else {
-                    html += '<strong>Sonos:</strong> Not configured<br>';
+                    html += '<strong>Sonos:</strong> Not connected<br>';
                 }
                 
                 devicesList.innerHTML = html || 'No devices found';
