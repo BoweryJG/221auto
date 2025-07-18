@@ -18,11 +18,27 @@ class SonosService extends EventEmitter {
     };
   }
 
+  getRequestConfig(accessToken) {
+    return {
+      headers: this.getHeaders(accessToken),
+      timeout: 10000, // 10 second timeout
+      validateStatus: (status) => status < 500 // Don't reject for 4xx errors
+    };
+  }
+
   async getHouseholds(accessToken) {
     try {
-      const response = await axios.get(`${this.apiUrl}/households`, {
-        headers: this.getHeaders(accessToken)
-      });
+      const response = await axios.get(`${this.apiUrl}/households`, 
+        this.getRequestConfig(accessToken)
+      );
+      
+      if (response.status === 401) {
+        throw new Error('Sonos authentication expired. Please reconnect.');
+      }
+      
+      if (response.status !== 200) {
+        throw new Error(`Sonos API error: ${response.status} ${response.statusText}`);
+      }
       
       this.households.clear();
       response.data.households.forEach(household => {
@@ -31,6 +47,9 @@ class SonosService extends EventEmitter {
       
       return response.data.households;
     } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Sonos API request timed out');
+      }
       console.error('Sonos API error:', error);
       throw error;
     }
@@ -40,33 +59,60 @@ class SonosService extends EventEmitter {
     try {
       const response = await axios.get(
         `${this.apiUrl}/households/${householdId}/groups`,
-        { headers: this.getHeaders(accessToken) }
+        this.getRequestConfig(accessToken)
       );
+      
+      if (response.status === 401) {
+        throw new Error('Sonos authentication expired. Please reconnect.');
+      }
+      
+      if (response.status !== 200) {
+        throw new Error(`Sonos API error: ${response.status} ${response.statusText}`);
+      }
       
       this.groups.set(householdId, response.data.groups);
       return response.data.groups;
     } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Sonos API request timed out');
+      }
       console.error('Sonos API error:', error);
       throw error;
     }
   }
 
   async getSpeakers() {
-    const speakers = [];
-    for (const [householdId, groups] of this.groups) {
-      groups.forEach(group => {
-        group.players.forEach(player => {
-          speakers.push({
-            id: player.id,
-            name: player.name,
-            householdId,
-            groupId: group.id,
-            coordinator: group.coordinatorId === player.id
+    try {
+      const accessToken = await this.getAccessToken();
+      
+      // Get households first
+      const households = await this.getHouseholds(accessToken);
+      if (!households.length) {
+        return [];
+      }
+      
+      // Get groups for each household
+      const speakers = [];
+      for (const household of households) {
+        const groups = await this.getGroups(accessToken, household.id);
+        groups.forEach(group => {
+          group.players.forEach(player => {
+            speakers.push({
+              id: player.id,
+              name: player.name,
+              householdId: household.id,
+              groupId: group.id,
+              coordinator: group.coordinatorId === player.id
+            });
           });
         });
-      });
+      }
+      
+      return speakers;
+    } catch (error) {
+      console.error('Error getting Sonos speakers:', error);
+      throw error;
     }
-    return speakers;
   }
 
   async controlSpeaker(speakerId, action, value) {
@@ -148,19 +194,13 @@ class SonosService extends EventEmitter {
   }
 
   async findSpeaker(speakerId) {
-    for (const [householdId, groups] of this.groups) {
-      for (const group of groups) {
-        const player = group.players.find(p => p.id === speakerId);
-        if (player) {
-          return {
-            ...player,
-            householdId,
-            groupId: group.id
-          };
-        }
-      }
+    try {
+      const speakers = await this.getSpeakers();
+      return speakers.find(speaker => speaker.id === speakerId) || null;
+    } catch (error) {
+      console.error('Error finding speaker:', error);
+      return null;
     }
-    return null;
   }
 
   async getAccessToken() {

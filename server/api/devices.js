@@ -27,7 +27,13 @@ router.get('/', async (req, res) => {
       devices.sonos = await sonosService.getSpeakers();
     } catch (error) {
       console.error('Sonos error:', error);
-      devices.sonos = { error: error.message };
+      devices.sonos = { 
+        error: error.message,
+        connected: false,
+        message: error.message.includes('not authenticated') 
+          ? 'Please connect Sonos via the Connect Sonos button'
+          : 'Connection failed - check credentials'
+      };
     }
     
     res.json(devices);

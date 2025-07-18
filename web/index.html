@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomeFlow - Music-Driven Home Automation</title>
+    <title>221 - Home Control</title>
     <style>
         * {
             margin: 0;
@@ -428,15 +428,12 @@
 </head>
 <body>
     <header>
-        <h1>HomeFlow</h1>
-        <p class="tagline">Music-Driven Home Automation</p>
+        <h1>221</h1>
+        <p class="tagline">Home Control</p>
     </header>
     
     <main>
         <section class="hero">
-            <h2>Your Home Dances to Your Music</h2>
-            <p>Experience the future of home automation where your music controls everything</p>
-            
             <!-- Quick Controls -->
             <div class="quick-controls">
                 <div class="vault-container">
@@ -453,46 +450,8 @@
             </div>
         </section>
         
-        <section class="features">
-            <div class="feature">
-                <div class="icon">🎵</div>
-                <h3>Unified Music Experience</h3>
-                <p>Seamlessly blend Spotify and Hype Machine in one beautiful interface</p>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">🏠</div>
-                <h3>Smart Device Control</h3>
-                <p>Control SwitchBot, Yale locks, and Sonos speakers with intelligent automation</p>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">🎭</div>
-                <h3>Mood-Based Scenes</h3>
-                <p>Lights and atmosphere adapt to your music's mood automatically</p>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">👋</div>
-                <h3>Gesture Control</h3>
-                <p>Control your music and home with intuitive switch patterns</p>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">🔒</div>
-                <h3>Welcome Home</h3>
-                <p>Your favorite music starts playing when you unlock your door</p>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">⚡</div>
-                <h3>Real-Time Sync</h3>
-                <p>Everything stays in perfect sync with WebSocket technology</p>
-            </div>
-        </section>
-        
         <div class="cta">
-            <a href="/visualizer/" class="button" id="launchApp">Launch Music Visualizer</a>
+            <a href="/visualizer/" class="button" id="launchApp">Launch Visualizer</a>
         </div>
         
         <section class="controls">
@@ -524,7 +483,7 @@
     </main>
     
     <div class="status disconnected" id="status">
-        <span id="statusText">Connecting to HomeFlow...</span>
+        <span id="statusText">Connecting to 221...</span>
     </div>
     
     <script>
@@ -539,11 +498,11 @@
                 
                 if (data.status === 'ok') {
                     document.getElementById('status').className = 'status connected';
-                    document.getElementById('statusText').textContent = 'Connected to HomeFlow v' + data.version;
+                    document.getElementById('statusText').textContent = 'Connected to 221 v' + data.version;
                 }
             } catch (error) {
                 document.getElementById('status').className = 'status disconnected';
-                document.getElementById('statusText').textContent = 'Backend not running';
+                document.getElementById('statusText').textContent = '221 not running';
             }
         }
         
