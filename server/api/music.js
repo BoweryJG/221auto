@@ -34,8 +34,12 @@ router.post('/queue/add', async (req, res) => {
 
 router.get('/spotify/playlists', async (req, res) => {
   try {
-    const playlists = await spotifyService.getUserPlaylists(req.user.spotifyToken);
-    res.json(playlists);
+    const accessToken = process.env.SPOTIFY_ACCESS_TOKEN;
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Spotify not connected' });
+    }
+    const playlists = await spotifyService.getUserPlaylists(accessToken);
+    res.json({ playlists });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -43,8 +47,14 @@ router.get('/spotify/playlists', async (req, res) => {
 
 router.get('/hypem/favorites', async (req, res) => {
   try {
-    const favorites = await hypemService.getFavorites(req.user.hypemToken);
-    res.json(favorites);
+    // HypeM favorites need login credentials
+    const username = process.env.HYPEM_USERNAME;
+    const password = process.env.HYPEM_PASSWORD;
+    if (!username || !password) {
+      return res.status(401).json({ error: 'HypeM not connected' });
+    }
+    const favorites = await hypemService.getFavorites(username, password);
+    res.json({ tracks: favorites });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
