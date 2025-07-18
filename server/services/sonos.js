@@ -146,7 +146,7 @@ class SonosService extends EventEmitter {
     return axios.post(
       `${this.apiUrl}/groups/${groupId}/playback/play`,
       {},
-      { headers: this.getHeaders(accessToken) }
+      this.getRequestConfig(accessToken)
     );
   }
 
@@ -154,7 +154,7 @@ class SonosService extends EventEmitter {
     return axios.post(
       `${this.apiUrl}/groups/${groupId}/playback/pause`,
       {},
-      { headers: this.getHeaders(accessToken) }
+      this.getRequestConfig(accessToken)
     );
   }
 
@@ -162,7 +162,7 @@ class SonosService extends EventEmitter {
     return axios.post(
       `${this.apiUrl}/groups/${groupId}/groupVolume`,
       { volume },
-      { headers: this.getHeaders(accessToken) }
+      this.getRequestConfig(accessToken)
     );
   }
 
@@ -170,7 +170,7 @@ class SonosService extends EventEmitter {
     return axios.post(
       `${this.apiUrl}/groups/${groupId}/playback/skipToNextTrack`,
       {},
-      { headers: this.getHeaders(accessToken) }
+      this.getRequestConfig(accessToken)
     );
   }
 
@@ -178,7 +178,7 @@ class SonosService extends EventEmitter {
     return axios.post(
       `${this.apiUrl}/groups/${groupId}/playback/skipToPreviousTrack`,
       {},
-      { headers: this.getHeaders(accessToken) }
+      this.getRequestConfig(accessToken)
     );
   }
 

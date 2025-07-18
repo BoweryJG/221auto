@@ -307,11 +307,22 @@ wss.on('connection', (ws) => {
           }
         } catch (error) {
           logger.error('Music control error:', error);
+          
+          // Provide more detailed error information
+          let errorMessage = error.message;
+          if (error.response) {
+            errorMessage = `HTTP ${error.response.status}: ${error.response.data?.message || error.response.statusText}`;
+          } else if (error.code === 'ECONNABORTED') {
+            errorMessage = 'Request timeout - Sonos may be offline';
+          } else if (error.code === 'ECONNREFUSED') {
+            errorMessage = 'Connection refused - Sonos API unavailable';
+          }
+          
           broadcast({
             type: 'musicControl',
             action: action,
             status: 'error',
-            error: error.message
+            error: errorMessage
           });
         }
       }
@@ -330,6 +341,22 @@ app.get('/health', (req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     version: '1.0.0'
+  });
+});
+
+app.get('/api/status', (req, res) => {
+  res.json({
+    services: {
+      sonos: {
+        authenticated: !!process.env.SONOS_ACCESS_TOKEN,
+        token: process.env.SONOS_ACCESS_TOKEN ? 'Present' : 'Missing'
+      },
+      spotify: {
+        authenticated: !!process.env.SPOTIFY_ACCESS_TOKEN,
+        token: process.env.SPOTIFY_ACCESS_TOKEN ? 'Present' : 'Missing'
+      }
+    },
+    timestamp: new Date().toISOString()
   });
 });
 
