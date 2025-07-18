@@ -26,6 +26,27 @@ class SonosService extends EventEmitter {
     };
   }
 
+  // Add a simple test method to check if our token works
+  async testConnection(accessToken) {
+    try {
+      const response = await axios.get(`${this.apiUrl}/households`, 
+        this.getRequestConfig(accessToken)
+      );
+      return {
+        success: true,
+        status: response.status,
+        householdCount: response.data.households?.length || 0
+      };
+    } catch (error) {
+      return {
+        success: false,
+        status: error.response?.status,
+        error: error.message,
+        details: error.response?.data
+      };
+    }
+  }
+
   async getHouseholds(accessToken) {
     try {
       const response = await axios.get(`${this.apiUrl}/households`, 

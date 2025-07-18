@@ -28,15 +28,20 @@ router.get('/', async (req, res) => {
           token: sonosAccessToken.substring(0, 10) + '...' // Show first 10 chars
         };
         
-        // Optionally try to get speakers, but don't fail if it doesn't work
-        try {
-          const speakers = await sonosService.getSpeakers();
-          devices.sonos.message = `Connected to Sonos (${speakers.length} speakers)`;
-          devices.sonos.speakers = speakers;
-        } catch (error) {
-          console.error('Sonos getSpeakers error (non-fatal):', error);
-          // Keep the basic connection message, just add a note
-          devices.sonos.message += ' - Speaker discovery failed but playback should work';
+        // Test the connection first
+        const testResult = await sonosService.testConnection(sonosAccessToken);
+        if (testResult.success) {
+          try {
+            const speakers = await sonosService.getSpeakers();
+            devices.sonos.message = `Connected to Sonos (${speakers.length} speakers)`;
+            devices.sonos.speakers = speakers;
+          } catch (error) {
+            console.error('Sonos getSpeakers error:', error);
+            devices.sonos.message = `Connected to Sonos but speaker discovery failed: ${error.message}`;
+          }
+        } else {
+          devices.sonos.message = `Connected but API test failed: ${testResult.error} (Status: ${testResult.status})`;
+          devices.sonos.testResult = testResult;
         }
       } else {
         devices.sonos = {
