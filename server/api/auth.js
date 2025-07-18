@@ -3,6 +3,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sonosService = require('../services/sonos');
+const spotifyService = require('../services/spotify');
+const hypemService = require('../services/hypem');
 
 router.post('/register', async (req, res) => {
   try {
@@ -33,10 +35,57 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Spotify OAuth routes
+router.get('/spotify', async (req, res) => {
+  try {
+    // Check if we already have tokens in environment
+    const existingAccessToken = process.env.SPOTIFY_ACCESS_TOKEN;
+    const existingRefreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
+    
+    if (existingAccessToken && existingRefreshToken) {
+      console.log('Using existing Spotify tokens from environment');
+      res.redirect('/?spotify=connected');
+      return;
+    }
+    
+    // No tokens found, initiate OAuth flow
+    const authUrl = spotifyService.getAuthUrl();
+    res.redirect(authUrl);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/spotify/callback', async (req, res) => {
   try {
-    res.redirect('/dashboard?spotify=connected');
+    const { code, error } = req.query;
+    
+    if (error) {
+      return res.status(400).json({ error: `Spotify auth error: ${error}` });
+    }
+    
+    if (!code) {
+      return res.status(400).json({ error: 'No authorization code received' });
+    }
+    
+    // Exchange code for tokens
+    const tokenData = await spotifyService.exchangeCodeForToken(code);
+    
+    // For now, log the tokens - in production, store them securely
+    console.log('Spotify tokens received:', {
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token,
+      expires_in: tokenData.expires_in
+    });
+    
+    // Store tokens temporarily in environment (in production, use database)
+    process.env.SPOTIFY_ACCESS_TOKEN = tokenData.access_token;
+    process.env.SPOTIFY_REFRESH_TOKEN = tokenData.refresh_token;
+    
+    // Redirect to success page
+    res.redirect('/?spotify=connected');
   } catch (error) {
+    console.error('Spotify callback error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -82,6 +131,30 @@ router.get('/sonos/callback', async (req, res) => {
   } catch (error) {
     console.error('Sonos callback error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Hype Machine authentication routes
+router.get('/hypem', async (req, res) => {
+  try {
+    // Use environment variables for credentials
+    const hypemUsername = process.env.HYPEM_USERNAME;
+    const hypemPassword = process.env.HYPEM_PASSWORD;
+    
+    if (!hypemUsername || !hypemPassword) {
+      return res.status(400).json({ error: 'Hype Machine credentials not configured in environment' });
+    }
+    
+    // Attempt login with Hype Machine using env credentials
+    const loginResult = await hypemService.login(hypemUsername, hypemPassword);
+    
+    console.log('Hype Machine login successful for user:', hypemUsername);
+    
+    // Redirect to success page
+    res.redirect('/?hypem=connected');
+  } catch (error) {
+    console.error('Hype Machine login error:', error);
+    res.redirect('/?hypem=error');
   }
 });
 

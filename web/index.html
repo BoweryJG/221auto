@@ -506,6 +506,14 @@
                 </div>
                 
                 <div class="control-card">
+                    <h3>🎵 Music Services</h3>
+                    <p>Connect your music accounts</p>
+                    <button class="control-btn" id="spotifyBtn" onclick="connectSpotify()">Connect Spotify</button>
+                    <button class="control-btn secondary" id="hypemBtn" onclick="connectHypemachine()">Connect Hype Machine</button>
+                    <div class="status-indicator" id="musicStatus">Not connected</div>
+                </div>
+                
+                <div class="control-card">
                     <h3>🏠 Connected Devices</h3>
                     <div id="devicesList">Loading...</div>
                     <button class="control-btn secondary" onclick="refreshDevices()">Refresh Devices</button>
@@ -646,8 +654,68 @@
             }
         }
         
-        // Load devices on page load
+        // Music service connection functions
+        async function connectSpotify() {
+            try {
+                const apiUrl = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000'
+                    : 'https://two21auto.onrender.com';
+                
+                // Redirect to Spotify OAuth
+                window.location.href = `${apiUrl}/auth/spotify`;
+            } catch (error) {
+                console.error('Error connecting to Spotify:', error);
+                document.getElementById('musicStatus').textContent = 'Spotify connection failed';
+                document.getElementById('musicStatus').className = 'status-indicator error';
+            }
+        }
+        
+        async function connectHypemachine() {
+            try {
+                const apiUrl = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000'
+                    : 'https://two21auto.onrender.com';
+                
+                // Redirect to Hype Machine login
+                window.location.href = `${apiUrl}/auth/hypem`;
+            } catch (error) {
+                console.error('Error connecting to Hype Machine:', error);
+                document.getElementById('musicStatus').textContent = 'Hype Machine connection failed';
+                document.getElementById('musicStatus').className = 'status-indicator error';
+            }
+        }
+        
+        // Check for connection status from URL params
+        function checkConnectionStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const spotifyConnected = urlParams.get('spotify');
+            const hypemConnected = urlParams.get('hypem');
+            const sonosConnected = urlParams.get('sonos');
+            
+            if (spotifyConnected === 'connected') {
+                document.getElementById('musicStatus').textContent = 'Spotify connected!';
+                document.getElementById('musicStatus').className = 'status-indicator success';
+            }
+            
+            if (hypemConnected === 'connected') {
+                document.getElementById('musicStatus').textContent = 'Hype Machine connected!';
+                document.getElementById('musicStatus').className = 'status-indicator success';
+            }
+            
+            if (hypemConnected === 'error') {
+                document.getElementById('musicStatus').textContent = 'Hype Machine connection failed';
+                document.getElementById('musicStatus').className = 'status-indicator error';
+            }
+            
+            if (sonosConnected === 'connected') {
+                // Could add Sonos status indicator if needed
+                console.log('Sonos connected!');
+            }
+        }
+
+        // Load devices on page load and check connection status
         refreshDevices();
+        checkConnectionStatus();
     </script>
 </body>
 </html>

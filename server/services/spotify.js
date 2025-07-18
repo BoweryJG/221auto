@@ -9,6 +9,33 @@ class SpotifyService {
     });
   }
 
+  getAuthUrl() {
+    const scopes = [
+      'user-read-currently-playing',
+      'user-read-playback-state',
+      'user-modify-playback-state',
+      'user-read-private',
+      'playlist-read-private',
+      'playlist-modify-private'
+    ];
+    
+    return this.spotifyApi.createAuthorizeURL(scopes);
+  }
+
+  async exchangeCodeForToken(code) {
+    try {
+      const data = await this.spotifyApi.authorizationCodeGrant(code);
+      return {
+        access_token: data.body.access_token,
+        refresh_token: data.body.refresh_token,
+        expires_in: data.body.expires_in
+      };
+    } catch (error) {
+      console.error('Spotify token exchange error:', error);
+      throw error;
+    }
+  }
+
   async getUserPlaylists(accessToken) {
     this.spotifyApi.setAccessToken(accessToken);
     
