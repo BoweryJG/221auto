@@ -10,6 +10,9 @@ const http = require('http');
 const app = express();
 const server = http.createServer(app);
 
+// Import music services
+const unifiedMusicService = require('./services/unifiedMusic');
+
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
@@ -38,8 +41,60 @@ const wss = new WebSocket.Server({
   path: '/ws'
 });
 
+// Broadcast function to send data to all connected clients
+function broadcast(data) {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
+// Connect music service events to WebSocket broadcasts
+unifiedMusicService.on('nowPlayingChanged', (track) => {
+  broadcast({
+    type: 'nowPlaying',
+    track: {
+      title: track.title,
+      artist: track.artist,
+      source: track.source,
+      mood: track.mood,
+      albumArt: track.albumArt
+    }
+  });
+});
+
+unifiedMusicService.on('moodChanged', (mood) => {
+  broadcast({
+    type: 'musicAnalysis',
+    mood: mood,
+    timestamp: Date.now()
+  });
+});
+
+unifiedMusicService.on('queueUpdated', (queue) => {
+  broadcast({
+    type: 'queueUpdated',
+    queue: queue.map(track => ({
+      id: track.id,
+      title: track.title,
+      artist: track.artist,
+      source: track.source
+    }))
+  });
+});
+
 wss.on('connection', (ws) => {
   logger.info('New WebSocket connection established');
+  
+  // Send current state to new connections
+  const nowPlaying = unifiedMusicService.getNowPlaying();
+  if (nowPlaying) {
+    ws.send(JSON.stringify({
+      type: 'nowPlaying',
+      track: nowPlaying
+    }));
+  }
   
   ws.on('message', (message) => {
     try {

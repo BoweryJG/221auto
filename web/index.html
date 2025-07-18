@@ -510,6 +510,7 @@
                     <p>Connect your music accounts</p>
                     <button class="control-btn" id="spotifyBtn" onclick="connectSpotify()">Connect Spotify</button>
                     <button class="control-btn secondary" id="hypemBtn" onclick="connectHypemachine()">Connect Hype Machine</button>
+                    <button class="control-btn secondary" id="sonosBtn" onclick="connectSonos()">Connect Sonos</button>
                     <div class="status-indicator" id="musicStatus">Not connected</div>
                 </div>
                 
@@ -685,6 +686,21 @@
             }
         }
         
+        async function connectSonos() {
+            try {
+                const apiUrl = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000'
+                    : 'https://two21auto.onrender.com';
+                
+                // Redirect to Sonos OAuth
+                window.location.href = `${apiUrl}/auth/sonos`;
+            } catch (error) {
+                console.error('Error connecting to Sonos:', error);
+                document.getElementById('musicStatus').textContent = 'Sonos connection failed';
+                document.getElementById('musicStatus').className = 'status-indicator error';
+            }
+        }
+        
         // Check for connection status from URL params
         function checkConnectionStatus() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -708,8 +724,8 @@
             }
             
             if (sonosConnected === 'connected') {
-                // Could add Sonos status indicator if needed
-                console.log('Sonos connected!');
+                document.getElementById('musicStatus').textContent = 'Sonos connected!';
+                document.getElementById('musicStatus').className = 'status-indicator success';
             }
         }
 

@@ -91,8 +91,19 @@ router.get('/spotify/callback', async (req, res) => {
 });
 
 // Sonos OAuth routes
-router.get('/sonos', (req, res) => {
+router.get('/sonos', async (req, res) => {
   try {
+    // Check if we already have tokens in environment
+    const existingAccessToken = process.env.SONOS_ACCESS_TOKEN;
+    const existingRefreshToken = process.env.SONOS_REFRESH_TOKEN;
+    
+    if (existingAccessToken && existingRefreshToken) {
+      console.log('Using existing Sonos tokens from environment');
+      res.redirect('/?sonos=connected');
+      return;
+    }
+    
+    // No tokens found, initiate OAuth flow
     const authUrl = sonosService.getAuthUrl();
     res.redirect(authUrl);
   } catch (error) {
@@ -127,7 +138,7 @@ router.get('/sonos/callback', async (req, res) => {
     process.env.SONOS_REFRESH_TOKEN = tokenData.refresh_token;
     
     // Redirect to success page
-    res.redirect('/dashboard?sonos=connected');
+    res.redirect('/?sonos=connected');
   } catch (error) {
     console.error('Sonos callback error:', error);
     res.status(500).json({ error: error.message });
