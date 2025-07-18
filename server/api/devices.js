@@ -21,22 +21,22 @@ router.get('/', async (req, res) => {
       // Check if Sonos is connected by checking environment tokens
       const sonosAccessToken = process.env.SONOS_ACCESS_TOKEN;
       if (sonosAccessToken) {
+        // For now, just confirm we have a token - skip the speakers API call
+        devices.sonos = {
+          connected: true,
+          message: 'Connected to Sonos (ready for music control)',
+          token: sonosAccessToken.substring(0, 10) + '...' // Show first 10 chars
+        };
+        
+        // Optionally try to get speakers, but don't fail if it doesn't work
         try {
           const speakers = await sonosService.getSpeakers();
-          devices.sonos = {
-            connected: true,
-            message: `Connected to Sonos (${speakers.length} speakers)`,
-            speakers: speakers
-          };
+          devices.sonos.message = `Connected to Sonos (${speakers.length} speakers)`;
+          devices.sonos.speakers = speakers;
         } catch (error) {
-          console.error('Sonos getSpeakers error:', error);
-          console.error('Full error details:', error.response?.data || error);
-          devices.sonos = {
-            connected: true,
-            message: `Connected but unable to get speakers: ${error.message}`,
-            error: error.message,
-            details: error.response?.data || null
-          };
+          console.error('Sonos getSpeakers error (non-fatal):', error);
+          // Keep the basic connection message, just add a note
+          devices.sonos.message += ' - Speaker discovery failed but playback should work';
         }
       } else {
         devices.sonos = {

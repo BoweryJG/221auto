@@ -268,7 +268,7 @@ class SonosService extends EventEmitter {
       client_id: this.clientId,
       response_type: 'code',
       state: 'sonos-auth',
-      scope: 'playback-control-all households.read groups.read',
+      scope: 'playback-control-all',
       redirect_uri: process.env.SONOS_REDIRECT_URI || 'http://localhost:3000/auth/sonos/callback'
     });
     
