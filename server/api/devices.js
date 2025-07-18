@@ -22,14 +22,16 @@ router.get('/', async (req, res) => {
       const sonosAccessToken = process.env.SONOS_ACCESS_TOKEN;
       if (sonosAccessToken) {
         try {
-          devices.sonos = await sonosService.getSpeakers();
-          if (!devices.sonos.error) {
-            devices.sonos.connected = true;
-            devices.sonos.message = 'Connected to Sonos';
-          }
-        } catch (error) {
+          const speakers = await sonosService.getSpeakers();
           devices.sonos = {
-            connected: false,
+            connected: true,
+            message: `Connected to Sonos (${speakers.length} speakers)`,
+            speakers: speakers
+          };
+        } catch (error) {
+          console.error('Sonos getSpeakers error:', error);
+          devices.sonos = {
+            connected: true,
             message: 'Connected but unable to get speakers',
             error: error.message
           };

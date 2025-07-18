@@ -84,18 +84,27 @@ class SonosService extends EventEmitter {
   async getSpeakers() {
     try {
       const accessToken = await this.getAccessToken();
+      console.log('Sonos: Getting speakers with access token');
       
       // Get households first
+      console.log('Sonos: Fetching households...');
       const households = await this.getHouseholds(accessToken);
+      console.log(`Sonos: Found ${households.length} households`);
+      
       if (!households.length) {
+        console.log('Sonos: No households found');
         return [];
       }
       
       // Get groups for each household
       const speakers = [];
       for (const household of households) {
+        console.log(`Sonos: Getting groups for household ${household.id}`);
         const groups = await this.getGroups(accessToken, household.id);
+        console.log(`Sonos: Found ${groups.length} groups in household ${household.id}`);
+        
         groups.forEach(group => {
+          console.log(`Sonos: Processing group ${group.id} with ${group.players.length} players`);
           group.players.forEach(player => {
             speakers.push({
               id: player.id,
@@ -108,9 +117,11 @@ class SonosService extends EventEmitter {
         });
       }
       
+      console.log(`Sonos: Found ${speakers.length} total speakers`);
       return speakers;
     } catch (error) {
       console.error('Error getting Sonos speakers:', error);
+      console.error('Error details:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -257,7 +268,7 @@ class SonosService extends EventEmitter {
       client_id: this.clientId,
       response_type: 'code',
       state: 'sonos-auth',
-      scope: 'playback-control-all',
+      scope: 'playback-control-all households.read groups.read',
       redirect_uri: process.env.SONOS_REDIRECT_URI || 'http://localhost:3000/auth/sonos/callback'
     });
     
