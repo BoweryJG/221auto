@@ -38,6 +38,8 @@ router.post('/login', async (req, res) => {
 // Spotify OAuth routes
 router.get('/spotify', async (req, res) => {
   try {
+    console.log('Spotify auth request received');
+    
     // Check if we already have tokens in environment
     const existingAccessToken = process.env.SPOTIFY_ACCESS_TOKEN;
     const existingRefreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
@@ -49,10 +51,13 @@ router.get('/spotify', async (req, res) => {
     }
     
     // No tokens found, initiate OAuth flow
+    console.log('Starting Spotify OAuth flow');
     const authUrl = spotifyService.getAuthUrl();
+    console.log('Redirecting to Spotify auth URL:', authUrl);
     res.redirect(authUrl);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Spotify auth error:', error);
+    res.redirect('https://221auto.netlify.app/?spotify=error');
   }
 });
 

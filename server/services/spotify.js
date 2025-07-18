@@ -7,6 +7,11 @@ class SpotifyService {
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       redirectUri: process.env.SPOTIFY_REDIRECT_URI
     });
+    
+    // Validate required environment variables
+    if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+      console.error('Spotify credentials not configured in environment');
+    }
   }
 
   getAuthUrl() {
