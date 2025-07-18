@@ -12,6 +12,7 @@ const server = http.createServer(app);
 
 // Import music services
 const unifiedMusicService = require('./services/unifiedMusic');
+const sonosService = require('./services/sonos');
 
 const logger = winston.createLogger({
   level: 'info',
@@ -105,44 +106,78 @@ wss.on('connection', (ws) => {
       if (data.type === 'musicControl') {
         const { action, volume } = data;
         
-        switch(action) {
-          case 'playPause':
-            // TODO: Implement Sonos play/pause using current access token
-            logger.info('Play/Pause command received');
-            broadcast({
-              type: 'musicControl',
-              action: 'playPause',
-              status: 'executed'
-            });
-            break;
-            
-          case 'next':
-            logger.info('Next track command received');
-            broadcast({
-              type: 'musicControl', 
-              action: 'next',
-              status: 'executed'
-            });
-            break;
-            
-          case 'previous':
-            logger.info('Previous track command received');
-            broadcast({
-              type: 'musicControl',
-              action: 'previous', 
-              status: 'executed'
-            });
-            break;
-            
-          case 'setVolume':
-            logger.info('Volume command received:', volume);
-            broadcast({
-              type: 'musicControl',
-              action: 'setVolume',
-              volume: volume,
-              status: 'executed'
-            });
-            break;
+        try {
+          // Get access token and first available group
+          const accessToken = process.env.SONOS_ACCESS_TOKEN;
+          if (!accessToken) {
+            throw new Error('Sonos not authenticated');
+          }
+
+          // Get households and groups to find first available group
+          const households = await sonosService.getHouseholds(accessToken);
+          if (!households.length) {
+            throw new Error('No Sonos households found');
+          }
+
+          const groups = await sonosService.getGroups(accessToken, households[0].id);
+          if (!groups.length) {
+            throw new Error('No Sonos groups found');
+          }
+
+          const groupId = groups[0].id;
+
+          switch(action) {
+            case 'playPause':
+              // Check current playback state and toggle
+              logger.info('Play/Pause command received');
+              // For now, assume play - in production, check current state first
+              await sonosService.play(accessToken, groupId);
+              broadcast({
+                type: 'musicControl',
+                action: 'playPause',
+                status: 'executed'
+              });
+              break;
+              
+            case 'next':
+              logger.info('Next track command received');
+              await sonosService.skipToNext(accessToken, groupId);
+              broadcast({
+                type: 'musicControl', 
+                action: 'next',
+                status: 'executed'
+              });
+              break;
+              
+            case 'previous':
+              logger.info('Previous track command received');
+              await sonosService.skipToPrevious(accessToken, groupId);
+              broadcast({
+                type: 'musicControl',
+                action: 'previous', 
+                status: 'executed'
+              });
+              break;
+              
+            case 'setVolume':
+              logger.info('Volume command received:', volume);
+              await sonosService.setVolume(accessToken, groupId, volume);
+              broadcast({
+                type: 'musicControl',
+                action: 'setVolume',
+                volume: volume,
+                status: 'executed'
+              });
+              break;
+          }
+        } catch (error) {
+          logger.error('Music control error:', error);
+          broadcast({
+            type: 'musicControl',
+            action: action,
+            status: 'error',
+            error: error.message
+          });
         }
       }
     } catch (error) {

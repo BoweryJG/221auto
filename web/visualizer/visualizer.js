@@ -77,6 +77,8 @@ class MusicVisualizer {
             this.updateDevice(data.device, data.status);
         } else if (data.type === 'beat') {
             this.onBeat();
+        } else if (data.type === 'musicControl') {
+            this.handleMusicControlResponse(data);
         }
     }
 
@@ -187,6 +189,29 @@ class MusicVisualizer {
                 }
                 console.log('Volume set to:', value);
                 break;
+        }
+    }
+    
+    handleMusicControlResponse(data) {
+        const { action, status, error } = data;
+        
+        if (status === 'executed') {
+            console.log(`Music control '${action}' executed successfully`);
+            
+            // Update button states or show feedback
+            const actionText = {
+                'playPause': 'Play/Pause',
+                'next': 'Next Track',
+                'previous': 'Previous Track',
+                'setVolume': 'Volume'
+            }[action] || action;
+            
+            // You could add visual feedback here
+            this.updateDevice('Sonos', `${actionText} executed`);
+            
+        } else if (status === 'error') {
+            console.error(`Music control '${action}' failed:`, error);
+            this.updateDevice('Sonos', `Error: ${error}`);
         }
     }
 
