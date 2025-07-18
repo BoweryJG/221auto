@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const switchBotService = require('../services/switchbot');
 const sonosService = require('../services/sonos');
+const hypemService = require('../services/hypem');
 
 router.get('/', async (req, res) => {
   try {
@@ -35,6 +36,29 @@ router.get('/', async (req, res) => {
         message: error.message.includes('not authenticated') 
           ? 'Please connect Sonos via the Connect Sonos button'
           : 'Connection failed - check credentials'
+      };
+    }
+    
+    // Check HypeM connection
+    try {
+      if (hypemService.isConnected && hypemService.isConnected()) {
+        devices.hypem = {
+          connected: true,
+          message: 'Connected to Hype Machine',
+          username: process.env.HYPEM_USERNAME || 'Unknown'
+        };
+      } else {
+        devices.hypem = {
+          connected: false,
+          message: 'Not connected - click Connect Hype Machine button'
+        };
+      }
+    } catch (error) {
+      console.error('HypeM error:', error);
+      devices.hypem = { 
+        error: error.message,
+        connected: false,
+        message: 'Connection failed'
       };
     }
     

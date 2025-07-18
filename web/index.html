@@ -1064,6 +1064,15 @@
                     html += '<strong>Sonos:</strong> Not connected<br>';
                 }
                 
+                // Add HypeM status
+                if (devices.hypem && devices.hypem.connected) {
+                    html += `<strong>Hype Machine:</strong> Connected (${devices.hypem.username})<br>`;
+                } else if (devices.hypem && devices.hypem.message) {
+                    html += `<strong>Hype Machine:</strong> ${devices.hypem.message}<br>`;
+                } else {
+                    html += '<strong>Hype Machine:</strong> Not connected<br>';
+                }
+                
                 devicesList.innerHTML = html || 'No devices found';
                 
             } catch (error) {
