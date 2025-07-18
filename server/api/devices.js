@@ -18,9 +18,22 @@ router.get('/', async (req, res) => {
     
     
     try {
-      // Check if Sonos is connected first
-      if (sonosService.isConnected && sonosService.isConnected()) {
-        devices.sonos = await sonosService.getSpeakers();
+      // Check if Sonos is connected by checking environment tokens
+      const sonosAccessToken = process.env.SONOS_ACCESS_TOKEN;
+      if (sonosAccessToken) {
+        try {
+          devices.sonos = await sonosService.getSpeakers();
+          if (!devices.sonos.error) {
+            devices.sonos.connected = true;
+            devices.sonos.message = 'Connected to Sonos';
+          }
+        } catch (error) {
+          devices.sonos = {
+            connected: false,
+            message: 'Connected but unable to get speakers',
+            error: error.message
+          };
+        }
       } else {
         devices.sonos = {
           connected: false,
@@ -39,13 +52,16 @@ router.get('/', async (req, res) => {
       };
     }
     
-    // Check HypeM connection
+    // Check HypeM connection by checking environment credentials
     try {
-      if (hypemService.isConnected && hypemService.isConnected()) {
+      const hypemUsername = process.env.HYPEM_USERNAME;
+      const hypemPassword = process.env.HYPEM_PASSWORD;
+      
+      if (hypemUsername && hypemPassword) {
         devices.hypem = {
           connected: true,
           message: 'Connected to Hype Machine',
-          username: process.env.HYPEM_USERNAME || 'Unknown'
+          username: hypemUsername
         };
       } else {
         devices.hypem = {
@@ -56,6 +72,29 @@ router.get('/', async (req, res) => {
     } catch (error) {
       console.error('HypeM error:', error);
       devices.hypem = { 
+        error: error.message,
+        connected: false,
+        message: 'Connection failed'
+      };
+    }
+    
+    // Check Spotify connection
+    try {
+      const spotifyAccessToken = process.env.SPOTIFY_ACCESS_TOKEN;
+      if (spotifyAccessToken) {
+        devices.spotify = {
+          connected: true,
+          message: 'Connected to Spotify'
+        };
+      } else {
+        devices.spotify = {
+          connected: false,
+          message: 'Not connected - click Connect Spotify button'
+        };
+      }
+    } catch (error) {
+      console.error('Spotify error:', error);
+      devices.spotify = { 
         error: error.message,
         connected: false,
         message: 'Connection failed'

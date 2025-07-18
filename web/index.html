@@ -1073,6 +1073,15 @@
                     html += '<strong>Hype Machine:</strong> Not connected<br>';
                 }
                 
+                // Add Spotify status
+                if (devices.spotify && devices.spotify.connected) {
+                    html += `<strong>Spotify:</strong> Connected<br>`;
+                } else if (devices.spotify && devices.spotify.message) {
+                    html += `<strong>Spotify:</strong> ${devices.spotify.message}<br>`;
+                } else {
+                    html += '<strong>Spotify:</strong> Not connected<br>';
+                }
+                
                 devicesList.innerHTML = html || 'No devices found';
                 
             } catch (error) {
