@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 const cron = require('node-cron');
 const unifiedMusicService = require('./unifiedMusic');
 const switchBotService = require('./switchbot');
-const yaleService = require('./yale');
 const sonosService = require('./sonos');
 
 class AutomationEngine extends EventEmitter {
@@ -138,13 +137,9 @@ class AutomationEngine extends EventEmitter {
   }
 
   async checkPresenceCondition(condition) {
-    const activity = await yaleService.getActivity(condition.lockId, 5);
-    const recentUnlock = activity.find(event => 
-      event.action === 'unlock' && 
-      new Date(event.timestamp) > new Date(Date.now() - 5 * 60 * 1000)
-    );
-    
-    return condition.presence === 'home' ? !!recentUnlock : !recentUnlock;
+    // Yale integration removed - return false for now
+    // Could be replaced with other presence detection methods
+    return false;
   }
 
   async checkMusicCondition(condition) {
@@ -185,10 +180,10 @@ class AutomationEngine extends EventEmitter {
     switch (action.device) {
       case 'switchbot':
         return switchBotService.sendCommand(action.deviceId, action.command, action.parameter);
-      case 'yale':
-        return yaleService.controlLock(action.deviceId, action.command);
       case 'sonos':
         return sonosService.controlSpeaker(action.deviceId, action.command, action.value);
+      default:
+        console.error('Unknown device type:', action.device);
     }
   }
 

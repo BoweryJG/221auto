@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-HomeFlow is a music-driven home automation platform that integrates SwitchBot, Yale locks, Sonos speakers, Spotify, and Hype Machine. The system creates intelligent automations based on music mood and tempo.
+221 is a music-driven home automation platform that integrates SwitchBot, Sonos speakers, Spotify, and Hype Machine. The system creates intelligent automations based on music mood and tempo.
 
 ## Architecture
 
@@ -15,10 +15,9 @@ HomeFlow is a music-driven home automation platform that integrates SwitchBot, Y
 
 ### Key Services
 - `switchbot.js` - Controls smart switches with gesture recognition
-- `yale.js` - Smart lock control and presence detection
 - `sonos.js` - Speaker control with better UX than native app
 - `spotify.js` - Music streaming integration
-- `hypem.js` - Hype Machine music discovery (uses web scraping)
+- `hypem.js` - Hype Machine music discovery (uses public API)
 - `unifiedMusic.js` - Combines Spotify/Hype Machine, analyzes mood
 - `automationEngine.js` - Rule engine for music-aware automations
 - `gestureController.js` - Pattern recognition for switch controls
@@ -59,8 +58,8 @@ git push origin main
 ## Environment Configuration
 
 Create `.env` from `.env.example` with:
-- Device APIs: SWITCHBOT_TOKEN, YALE_ACCESS_TOKEN, SONOS_CLIENT_ID
-- Music: SPOTIFY_CLIENT_ID, HYPEM_USERNAME
+- Device APIs: SWITCHBOT_TOKEN, SONOS_CLIENT_ID, SONOS_CLIENT_SECRET
+- Music: SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, HYPEM_USERNAME
 - Database: DATABASE_URL (PostgreSQL), REDIS_URL
 - Security: JWT_SECRET, ENCRYPTION_KEY
 

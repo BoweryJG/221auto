@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const switchBotService = require('../services/switchbot');
-const yaleService = require('../services/yale');
 const automationEngine = require('../services/automationEngine');
 
 // SwitchBot webhook
@@ -21,26 +20,6 @@ router.post('/switchbot', (req, res) => {
   }
 });
 
-// Yale webhook
-router.post('/yale', async (req, res) => {
-  try {
-    const event = req.body;
-    
-    if (event.type === 'lock.unlocked') {
-      // Trigger welcome home automation
-      automationEngine.emit('presence-detected', {
-        userId: event.userId,
-        lockId: event.lockId,
-        method: event.method // keypad, app, auto-unlock
-      });
-    }
-    
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Yale webhook error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Gesture training endpoint
 router.post('/gesture/train', async (req, res) => {
