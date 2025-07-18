@@ -44,7 +44,7 @@ router.get('/spotify', async (req, res) => {
     
     if (existingAccessToken && existingRefreshToken) {
       console.log('Using existing Spotify tokens from environment');
-      res.redirect('/?spotify=connected');
+      res.redirect('https://221auto.netlify.app/?spotify=connected');
       return;
     }
     
@@ -83,7 +83,7 @@ router.get('/spotify/callback', async (req, res) => {
     process.env.SPOTIFY_REFRESH_TOKEN = tokenData.refresh_token;
     
     // Redirect to success page
-    res.redirect('/?spotify=connected');
+    res.redirect('https://221auto.netlify.app/?spotify=connected');
   } catch (error) {
     console.error('Spotify callback error:', error);
     res.status(500).json({ error: error.message });
@@ -99,7 +99,7 @@ router.get('/sonos', async (req, res) => {
     
     if (existingAccessToken && existingRefreshToken) {
       console.log('Using existing Sonos tokens from environment');
-      res.redirect('/?sonos=connected');
+      res.redirect('https://221auto.netlify.app/?sonos=connected');
       return;
     }
     
@@ -138,7 +138,7 @@ router.get('/sonos/callback', async (req, res) => {
     process.env.SONOS_REFRESH_TOKEN = tokenData.refresh_token;
     
     // Redirect to success page
-    res.redirect('/?sonos=connected');
+    res.redirect('https://221auto.netlify.app/?sonos=connected');
   } catch (error) {
     console.error('Sonos callback error:', error);
     res.status(500).json({ error: error.message });
@@ -162,10 +162,10 @@ router.get('/hypem', async (req, res) => {
     console.log('Hype Machine login successful for user:', hypemUsername);
     
     // Redirect to success page
-    res.redirect('/?hypem=connected');
+    res.redirect('https://221auto.netlify.app/?hypem=connected');
   } catch (error) {
     console.error('Hype Machine login error:', error);
-    res.redirect('/?hypem=error');
+    res.redirect('https://221auto.netlify.app/?hypem=error');
   }
 });
 

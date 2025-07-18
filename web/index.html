@@ -663,7 +663,7 @@
                     : 'https://two21auto.onrender.com';
                 
                 // Redirect to Spotify OAuth
-                window.location.href = `${apiUrl}/auth/spotify`;
+                window.location.href = `${apiUrl}/api/auth/spotify`;
             } catch (error) {
                 console.error('Error connecting to Spotify:', error);
                 document.getElementById('musicStatus').textContent = 'Spotify connection failed';
@@ -678,7 +678,7 @@
                     : 'https://two21auto.onrender.com';
                 
                 // Redirect to Hype Machine login
-                window.location.href = `${apiUrl}/auth/hypem`;
+                window.location.href = `${apiUrl}/api/auth/hypem`;
             } catch (error) {
                 console.error('Error connecting to Hype Machine:', error);
                 document.getElementById('musicStatus').textContent = 'Hype Machine connection failed';
@@ -693,7 +693,7 @@
                     : 'https://two21auto.onrender.com';
                 
                 // Redirect to Sonos OAuth
-                window.location.href = `${apiUrl}/auth/sonos`;
+                window.location.href = `${apiUrl}/api/auth/sonos`;
             } catch (error) {
                 console.error('Error connecting to Sonos:', error);
                 document.getElementById('musicStatus').textContent = 'Sonos connection failed';
