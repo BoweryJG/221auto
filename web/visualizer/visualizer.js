@@ -222,6 +222,9 @@ class MusicVisualizer {
         } else if (status === 'error') {
             console.error(`Music control '${action}' failed:`, error);
             this.updateDevice('Sonos', `Error: ${error}`);
+            
+            // Show error message to user
+            alert(`Music control failed: ${error}`);
         }
     }
 
