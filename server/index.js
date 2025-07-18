@@ -304,6 +304,17 @@ wss.on('connection', (ws) => {
                 status: 'executed'
               });
               break;
+              
+            case 'startRadio':
+              logger.info('Start radio command received');
+              // Load a default radio station or playlist
+              await sonosService.loadRadioStation(accessToken, groupId);
+              broadcast({
+                type: 'musicControl',
+                action: 'startRadio',
+                status: 'executed'
+              });
+              break;
           }
         } catch (error) {
           logger.error('Music control error:', error);

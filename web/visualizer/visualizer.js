@@ -147,6 +147,10 @@ class MusicVisualizer {
                 this.sendMusicCommand('setVolume', parseInt(volume));
             }
         });
+        
+        document.getElementById('startRadioBtn').addEventListener('click', () => {
+            this.sendMusicCommand('startRadio');
+        });
     }
     
     sendMusicCommand(command, value) {
@@ -198,6 +202,16 @@ class MusicVisualizer {
                     }));
                 }
                 console.log('Volume set to:', value);
+                break;
+                
+            case 'startRadio':
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'musicControl',
+                        action: 'startRadio'
+                    }));
+                }
+                console.log('Starting radio...');
                 break;
         }
     }

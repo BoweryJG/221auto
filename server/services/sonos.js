@@ -189,7 +189,21 @@ class SonosService extends EventEmitter {
         uri: spotifyUri,
         playOnCompletion: true
       },
-      { headers: this.getHeaders(accessToken) }
+      this.getRequestConfig(accessToken)
+    );
+  }
+
+  async loadRadioStation(accessToken, groupId) {
+    // Load Sonos Radio (free streaming)
+    const radioUri = 'x-sonos-radio://radio.tunein.com/s5384'; // Popular station
+    
+    return axios.post(
+      `${this.apiUrl}/groups/${groupId}/playback/load`,
+      {
+        uri: radioUri,
+        playOnCompletion: true
+      },
+      this.getRequestConfig(accessToken)
     );
   }
 
