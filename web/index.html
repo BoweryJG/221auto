@@ -1243,7 +1243,13 @@
             document.querySelectorAll('.source-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            // Find and activate the correct tab
+            document.querySelectorAll('.source-tab').forEach(tab => {
+                if (tab.textContent.toLowerCase() === source.toLowerCase()) {
+                    tab.classList.add('active');
+                }
+            });
             
             // Hide all content
             document.querySelectorAll('.source-content').forEach(content => {
