@@ -805,6 +805,49 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Footer styles */
+        footer {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .viking-ship {
+            width: 300px;
+            height: 150px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .viking-ship:hover {
+            opacity: 1;
+        }
+        
+        .footer-text {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .viking-ship {
+                width: 250px;
+                height: 125px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -936,6 +979,13 @@
             </div>
         </section>
     </main>
+    
+    <footer>
+        <div class="footer-content">
+            <img src="public/viking-longship.svg" alt="Viking Longship" class="viking-ship">
+            <p class="footer-text">Sail forth into the digital seas of home automation</p>
+        </div>
+    </footer>
     
     <div class="status disconnected" id="status">
         <span id="statusText">Connecting to 221...</span>

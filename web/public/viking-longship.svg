@@ -1,0 +1,57 @@
+<svg width="300" height="150" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="seaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2171B5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="shipGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sailGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#DC143C;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DC143C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Sea -->
+  <rect width="300" height="150" fill="url(#seaGradient)"/>
+  
+  <!-- Waves -->
+  <path d="M0,120 Q75,110 150,120 T300,120 L300,150 L0,150 Z" fill="#1E5F8B" opacity="0.7"/>
+  <path d="M0,130 Q50,125 100,130 T200,130 T300,130 L300,150 L0,150 Z" fill="#0F4A6B" opacity="0.5"/>
+  
+  <!-- Ship hull -->
+  <path d="M50,100 Q50,110 70,115 L230,115 Q250,110 250,100 L240,95 L60,95 Z" fill="url(#shipGradient)" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Dragon head -->
+  <path d="M50,100 Q40,95 35,90 Q30,85 32,80 Q35,75 40,78 Q45,82 50,85 Z" fill="#654321" stroke="#4A2C17" stroke-width="1"/>
+  <circle cx="37" cy="82" r="2" fill="#FF6B47"/>
+  
+  <!-- Mast -->
+  <line x1="150" y1="95" x2="150" y2="30" stroke="#8B4513" stroke-width="4"/>
+  
+  <!-- Sail -->
+  <path d="M160,35 Q200,40 220,35 L220,80 Q200,85 160,80 Z" fill="url(#sailGradient)" stroke="#B8860B" stroke-width="1"/>
+  
+  <!-- Sail stripes -->
+  <line x1="160" y1="45" x2="220" y2="45" stroke="#FFFFFF" stroke-width="2" opacity="0.8"/>
+  <line x1="160" y1="55" x2="220" y2="55" stroke="#FFFFFF" stroke-width="2" opacity="0.8"/>
+  <line x1="160" y1="65" x2="220" y2="65" stroke="#FFFFFF" stroke-width="2" opacity="0.8"/>
+  <line x1="160" y1="75" x2="220" y2="75" stroke="#FFFFFF" stroke-width="2" opacity="0.8"/>
+  
+  <!-- Oars -->
+  <line x1="80" y1="95" x2="75" y2="110" stroke="#8B4513" stroke-width="2"/>
+  <line x1="120" y1="95" x2="115" y2="110" stroke="#8B4513" stroke-width="2"/>
+  <line x1="180" y1="95" x2="185" y2="110" stroke="#8B4513" stroke-width="2"/>
+  <line x1="220" y1="95" x2="225" y2="110" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Shield -->
+  <circle cx="90" cy="100" r="8" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="210" cy="100" r="8" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+  
+  <!-- Clouds -->
+  <ellipse cx="50" cy="25" rx="20" ry="8" fill="#E6E6FA" opacity="0.7"/>
+  <ellipse cx="250" cy="20" rx="25" ry="10" fill="#E6E6FA" opacity="0.6"/>
+</svg>
