@@ -40,13 +40,10 @@ router.get('/spotify', async (req, res) => {
   try {
     console.log('Spotify auth request received');
     
-    // Check if we already have tokens in environment
-    const existingAccessToken = process.env.SPOTIFY_ACCESS_TOKEN;
-    const existingRefreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
-    
-    if (existingAccessToken && existingRefreshToken) {
-      console.log('Using existing Spotify tokens from environment');
-      res.redirect('https://221auto.netlify.app/?spotify=connected');
+    // Check if we already have valid tokens
+    if (spotifyService.isConnected()) {
+      console.log('Using existing Spotify tokens');
+      res.redirect('http://localhost:3000/?spotify=connected');
       return;
     }
     
@@ -57,7 +54,7 @@ router.get('/spotify', async (req, res) => {
     res.redirect(authUrl);
   } catch (error) {
     console.error('Spotify auth error:', error);
-    res.redirect('https://221auto.netlify.app/?spotify=error');
+    res.redirect('http://localhost:3000/?spotify=error');
   }
 });
 
@@ -73,22 +70,13 @@ router.get('/spotify/callback', async (req, res) => {
       return res.status(400).json({ error: 'No authorization code received' });
     }
     
-    // Exchange code for tokens
+    // Exchange code for tokens - now automatically saves to disk
     const tokenData = await spotifyService.exchangeCodeForToken(code);
     
-    // For now, log the tokens - in production, store them securely
-    console.log('Spotify tokens received:', {
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      expires_in: tokenData.expires_in
-    });
-    
-    // Store tokens temporarily in environment (in production, use database)
-    process.env.SPOTIFY_ACCESS_TOKEN = tokenData.access_token;
-    process.env.SPOTIFY_REFRESH_TOKEN = tokenData.refresh_token;
+    console.log('Spotify tokens received and saved to disk');
     
     // Redirect to success page
-    res.redirect('https://221auto.netlify.app/?spotify=connected');
+    res.redirect('http://localhost:3000/?spotify=connected');
   } catch (error) {
     console.error('Spotify callback error:', error);
     res.status(500).json({ error: error.message });

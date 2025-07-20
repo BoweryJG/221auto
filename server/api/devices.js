@@ -89,8 +89,7 @@ router.get('/', async (req, res) => {
     
     // Check Spotify connection
     try {
-      const spotifyAccessToken = process.env.SPOTIFY_ACCESS_TOKEN;
-      if (spotifyAccessToken) {
+      if (spotifyService.isConnected()) {
         devices.spotify = {
           connected: true,
           message: 'Connected to Spotify'

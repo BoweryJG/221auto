@@ -1,5 +1,6 @@
 const axios = require('axios');
 const EventEmitter = require('events');
+const tokenManager = require('../storage/tokenManager');
 
 class SonosService extends EventEmitter {
   constructor() {
@@ -9,6 +10,25 @@ class SonosService extends EventEmitter {
     this.clientId = process.env.SONOS_CLIENT_ID;
     this.clientSecret = process.env.SONOS_CLIENT_SECRET;
     this.apiUrl = 'https://api.ws.sonos.com/control/api/v1';
+    this.tokens = null;
+    
+    // Load saved tokens on startup
+    this.loadTokens();
+  }
+
+  async loadTokens() {
+    try {
+      this.tokens = await tokenManager.loadSonosTokens();
+      if (this.tokens) {
+        console.log('Sonos: Loaded saved tokens');
+      }
+    } catch (error) {
+      console.error('Error loading Sonos tokens:', error);
+    }
+  }
+
+  isConnected() {
+    return this.tokens && this.tokens.access_token;
   }
 
   getHeaders(accessToken) {

@@ -1,4 +1,5 @@
 const SpotifyWebApi = require('spotify-web-api-node');
+const tokenManager = require('../storage/tokenManager');
 
 class SpotifyService {
   constructor() {
@@ -8,9 +9,27 @@ class SpotifyService {
       redirectUri: process.env.SPOTIFY_REDIRECT_URI?.trim()
     });
     
+    this.tokens = null;
+    
     // Validate required environment variables
     if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
       console.error('Spotify credentials not configured in environment');
+    }
+    
+    // Load saved tokens on startup
+    this.loadTokens();
+  }
+
+  async loadTokens() {
+    try {
+      this.tokens = await tokenManager.loadSpotifyTokens();
+      if (this.tokens) {
+        this.spotifyApi.setAccessToken(this.tokens.access_token);
+        this.spotifyApi.setRefreshToken(this.tokens.refresh_token);
+        console.log('Spotify: Loaded saved tokens');
+      }
+    } catch (error) {
+      console.error('Error loading Spotify tokens:', error);
     }
   }
 
@@ -30,19 +49,66 @@ class SpotifyService {
   async exchangeCodeForToken(code) {
     try {
       const data = await this.spotifyApi.authorizationCodeGrant(code);
-      return {
+      
+      this.tokens = {
         access_token: data.body.access_token,
         refresh_token: data.body.refresh_token,
-        expires_in: data.body.expires_in
+        expires_in: data.body.expires_in,
+        expires_at: Date.now() + (data.body.expires_in * 1000)
       };
+      
+      // Save tokens to disk
+      await tokenManager.saveSpotifyTokens(this.tokens);
+      
+      // Set tokens in API client
+      this.spotifyApi.setAccessToken(this.tokens.access_token);
+      this.spotifyApi.setRefreshToken(this.tokens.refresh_token);
+      
+      return this.tokens;
     } catch (error) {
       console.error('Spotify token exchange error:', error);
       throw error;
     }
   }
 
-  async getUserPlaylists(accessToken) {
-    this.spotifyApi.setAccessToken(accessToken);
+  isConnected() {
+    return this.tokens && this.tokens.access_token;
+  }
+
+  async ensureValidToken() {
+    if (!this.tokens) {
+      throw new Error('Spotify not connected');
+    }
+
+    // Check if token is expired or expires soon (within 5 minutes)
+    if (this.tokens.expires_at && this.tokens.expires_at < Date.now() + (5 * 60 * 1000)) {
+      console.log('Spotify token expired, refreshing...');
+      await this.refreshToken();
+    }
+
+    this.spotifyApi.setAccessToken(this.tokens.access_token);
+  }
+
+  async refreshToken() {
+    try {
+      const data = await this.spotifyApi.refreshAccessToken();
+      
+      this.tokens.access_token = data.body.access_token;
+      this.tokens.expires_in = data.body.expires_in;
+      this.tokens.expires_at = Date.now() + (data.body.expires_in * 1000);
+      
+      // Save updated tokens
+      await tokenManager.saveSpotifyTokens(this.tokens);
+      
+      console.log('Spotify token refreshed');
+    } catch (error) {
+      console.error('Error refreshing Spotify token:', error);
+      throw error;
+    }
+  }
+
+  async getUserPlaylists() {
+    await this.ensureValidToken();
     
     try {
       const data = await this.spotifyApi.getUserPlaylists();
@@ -53,8 +119,8 @@ class SpotifyService {
     }
   }
 
-  async getCurrentlyPlaying(accessToken) {
-    this.spotifyApi.setAccessToken(accessToken);
+  async getCurrentlyPlaying() {
+    await this.ensureValidToken();
     
     try {
       const data = await this.spotifyApi.getMyCurrentPlayingTrack();
@@ -65,8 +131,8 @@ class SpotifyService {
     }
   }
 
-  async getTrackAnalysis(accessToken, trackId) {
-    this.spotifyApi.setAccessToken(accessToken);
+  async getTrackAnalysis(trackId) {
+    await this.ensureValidToken();
     
     try {
       const [features, analysis] = await Promise.all([

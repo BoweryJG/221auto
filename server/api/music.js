@@ -34,11 +34,10 @@ router.post('/queue/add', async (req, res) => {
 
 router.get('/spotify/playlists', async (req, res) => {
   try {
-    const accessToken = process.env.SPOTIFY_ACCESS_TOKEN;
-    if (!accessToken) {
+    if (!spotifyService.isConnected()) {
       return res.status(401).json({ error: 'Spotify not connected' });
     }
-    const playlists = await spotifyService.getUserPlaylists(accessToken);
+    const playlists = await spotifyService.getUserPlaylists();
     res.json({ playlists });
   } catch (error) {
     res.status(500).json({ error: error.message });
