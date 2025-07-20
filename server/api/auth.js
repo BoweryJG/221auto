@@ -43,7 +43,7 @@ router.get('/spotify', async (req, res) => {
     // Check if we already have valid tokens
     if (spotifyService.isConnected()) {
       console.log('Using existing Spotify tokens');
-      res.redirect('http://localhost:3000/?spotify=connected');
+      res.redirect('https://221auto.netlify.app/?spotify=connected');
       return;
     }
     
@@ -54,7 +54,7 @@ router.get('/spotify', async (req, res) => {
     res.redirect(authUrl);
   } catch (error) {
     console.error('Spotify auth error:', error);
-    res.redirect('http://localhost:3000/?spotify=error');
+    res.redirect('https://221auto.netlify.app/?spotify=error');
   }
 });
 
@@ -76,7 +76,7 @@ router.get('/spotify/callback', async (req, res) => {
     console.log('Spotify tokens received and saved to disk');
     
     // Redirect to success page
-    res.redirect('http://localhost:3000/?spotify=connected');
+    res.redirect('https://221auto.netlify.app/?spotify=connected');
   } catch (error) {
     console.error('Spotify callback error:', error);
     res.status(500).json({ error: error.message });
