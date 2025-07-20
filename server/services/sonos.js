@@ -122,19 +122,29 @@ class SonosService extends EventEmitter {
       for (const household of households) {
         console.log(`Sonos: Getting groups for household ${household.id}`);
         const groups = await this.getGroups(accessToken, household.id);
-        console.log(`Sonos: Found ${groups.length} groups in household ${household.id}`);
+        console.log(`Sonos: Found ${groups?.length || 0} groups in household ${household.id}`);
+        
+        if (!groups || !Array.isArray(groups)) {
+          console.log(`Sonos: No valid groups array for household ${household.id}:`, groups);
+          continue;
+        }
         
         groups.forEach(group => {
-          console.log(`Sonos: Processing group ${group.id} with ${group.players.length} players`);
-          group.players.forEach(player => {
-            speakers.push({
-              id: player.id,
-              name: player.name,
-              householdId: household.id,
-              groupId: group.id,
-              coordinator: group.coordinatorId === player.id
+          console.log(`Sonos: Processing group ${group.id}`);
+          if (group.players && Array.isArray(group.players)) {
+            console.log(`Sonos: Group has ${group.players.length} players`);
+            group.players.forEach(player => {
+              speakers.push({
+                id: player.id,
+                name: player.name,
+                householdId: household.id,
+                groupId: group.id,
+                coordinator: group.coordinatorId === player.id
+              });
             });
-          });
+          } else {
+            console.log(`Sonos: Group ${group.id} has no players array:`, group);
+          }
         });
       }
       
