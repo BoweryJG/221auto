@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const sonosService = require('../services/sonos');
 const spotifyService = require('../services/spotify');
 const hypemService = require('../services/hypem');
+const tokenManager = require('../storage/tokenManager');
 
 router.post('/register', async (req, res) => {
   try {
@@ -129,6 +130,12 @@ router.get('/sonos/callback', async (req, res) => {
     // Store tokens temporarily in environment (in production, use database)
     process.env.SONOS_ACCESS_TOKEN = tokenData.access_token;
     process.env.SONOS_REFRESH_TOKEN = tokenData.refresh_token;
+    
+    // Save tokens to disk for persistence
+    await tokenManager.saveSonosTokens(tokenData);
+    
+    // Update the service's tokens
+    sonosService.tokens = tokenData;
     
     // Redirect to success page
     res.redirect('https://221auto.netlify.app/?sonos=connected');

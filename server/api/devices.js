@@ -18,8 +18,19 @@ router.get('/', async (req, res) => {
     
     
     try {
-      // Check if Sonos is connected by checking environment tokens
-      const sonosAccessToken = process.env.SONOS_ACCESS_TOKEN;
+      // Check if Sonos is connected by checking for tokens
+      let sonosAccessToken = process.env.SONOS_ACCESS_TOKEN;
+      
+      // If no token in env, try to get it from the service
+      if (!sonosAccessToken) {
+        try {
+          sonosAccessToken = await sonosService.getAccessToken();
+        } catch (e) {
+          // No token available
+          sonosAccessToken = null;
+        }
+      }
+      
       if (sonosAccessToken) {
         // For now, just confirm we have a token - skip the speakers API call
         devices.sonos = {

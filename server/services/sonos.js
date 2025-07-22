@@ -280,9 +280,23 @@ class SonosService extends EventEmitter {
   }
 
   async getAccessToken() {
-    // Check if we have stored tokens
+    // First check if we have tokens in memory
+    if (this.tokens && this.tokens.access_token) {
+      return this.tokens.access_token;
+    }
+    
+    // Check if we have stored tokens in environment
     if (process.env.SONOS_ACCESS_TOKEN) {
       return process.env.SONOS_ACCESS_TOKEN;
+    }
+    
+    // Try to load from disk
+    await this.loadTokens();
+    if (this.tokens && this.tokens.access_token) {
+      // Also update environment for backward compatibility
+      process.env.SONOS_ACCESS_TOKEN = this.tokens.access_token;
+      process.env.SONOS_REFRESH_TOKEN = this.tokens.refresh_token;
+      return this.tokens.access_token;
     }
     
     // If no token, throw error with instructions
