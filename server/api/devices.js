@@ -3,6 +3,7 @@ const router = express.Router();
 const switchBotService = require('../services/switchbot');
 const sonosService = require('../services/sonos');
 const hypemService = require('../services/hypem');
+const spotifyService = require('../services/spotify');
 
 router.get('/', async (req, res) => {
   try {
